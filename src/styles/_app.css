@@ -1,0 +1,85 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: #111;
+}
+header {
+    height: 20px;
+    padding: 10px 0;
+    width: 100%;
+    border-bottom: 1px solid #333;
+    background: #000;
+    align-items: center;
+    color: #333;
+}
+header a {
+    color: #333;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background: #333;
+    padding: 5px;
+    color: #fff;
+    width: 100%;
+    padding: 5px 0;
+    font-size: 10px;
+    text-align: center;
+}
+
+
+#app-shell {
+
+    height: 100vh;
+}
+
+#header-nav {
+    display: flex;
+    margin-left: 20px;
+    column-gap: 0px;
+}
+
+#header-nav a {
+    border-left: 1px solid #333;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 3px;
+}
+#header-nav a:first-child {
+    border-left: none;
+}
+
+#header-nav a:hover {
+    background: #777;
+    color: #fff;
+}
+
+#homepage-grid {
+    display: flex;
+    margin: 200px auto 0;
+    width: 800px;
+}
+
+.box-outline {
+    border: 1px solid #fff;
+    margin: 20px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.box-outline a {
+    padding: 90px;
+    display: block;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+.box-outline a:hover {
+    background: #777;
+}
+
+
+#listContainer {
+    width: 100%;
+    height: 600px;
+}

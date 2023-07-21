@@ -1,0 +1,45 @@
+#home {
+    height: 80vh;
+    position: relative;
+}
+
+#logo h1 a {
+    line-height: 80%;
+}
+
+.page-home main {
+    overflow: hidden;
+}
+
+@media (max-width: 950px) {
+    /* .page-home #logo h1 a {
+        font-size: 120px;
+        width: 290px;
+        padding-top: 50px;
+    } */
+
+    #enter-link {
+        position: absolute;
+        top: 200px;
+        width: 100%;
+    }
+
+}
+
+@media (min-width: 951px) {
+
+    /* .page-home #logo h1 a {
+        position: absolute;
+        left: 50%;
+        margin-left: -165px;
+        width: 330px;
+        font-size: 110px;
+        padding-top: 130px;
+    } */
+
+    #enter-link {
+        margin: 0px auto;
+        width: 330px;
+        margin-top: 270px;
+    }
+}
