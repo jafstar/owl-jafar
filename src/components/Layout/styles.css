@@ -1,22 +1,26 @@
 #logo {
-    padding: 16px;
+  padding: 16px;
 }
 
 #logo a {
-    display: block;
-    width: 240px;
-    height: 50px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 34px;
-    font-variant: small-caps;
-    /* background: transparent url('../../public/images/'); */
-    background-size: cover;
-    background-repeat: no-repeat;
+  display: block;
+  width: 240px;
+  height: 50px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 34px;
+  font-variant: small-caps;
+  /* background: transparent url('../../public/images/'); */
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 #logo span {
-    color: transparent;
-    display: inline-block;
+  color: transparent;
+  display: inline-block;
+}
 
+.search-box {
+  display: flex;
+  flex-direction: row;
 }
