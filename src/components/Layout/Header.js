@@ -1,16 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { atom, selector, DefaultValue, useRecoilState } from "recoil";
 
-import {
-  atom,
-  selector,
-  DefaultValue,
-  useRecoilValue,
-  useResetRecoilState,
-  useRecoilState,
-} from "recoil";
-
+import { TEST_DATA } from "../../../mockdata/SEARCH_QUERY_AAPL";
 import "./styles.css";
 
 const API_KEY = process.env.ALPHAVANTAGE_API;
@@ -21,7 +14,7 @@ const API_KEY = process.env.ALPHAVANTAGE_API;
  *  */
 export const atomCurrentSymbol = atom({
   key: "atomCurrentSymbol", // unique ID
-  default: "GOOG", // default value
+  default: "", // default value
 });
 
 export const selectorCurrentSymbol = selector({
@@ -32,34 +25,48 @@ export const selectorCurrentSymbol = selector({
 });
 
 const Header = () => {
+  // REFs
   const inputRef = React.useRef();
 
+  // Store State
   const [currentSymbol, setCurrentSymbol] = useRecoilState(atomCurrentSymbol);
 
+  // Local State
   const [isLoading, setIsLoading] = React.useState(null);
 
-  const SearchInput = async () => {
+  const SearchInput = async (tmpInput = inputRef.current.value) => {
+    const currentInputVal = tmpInput;
+
     setIsLoading(true);
     toast.loading("Waiting...");
-    const currentInputVal = inputRef.current.value;
 
-    console.log("searching new symbol: ", currentInputVal);
+    /*
     const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currentInputVal}&apikey=${API_KEY}`;
     const getData = await fetch(url);
     const resp = await getData.json();
-    console.log("resp: ", resp);
+    */
+    // MOCK DATA
+    const resp = await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(TEST_DATA);
+      }, 2000);
+    });
+
+    setIsLoading(false);
+    toast.remove();
 
     if (resp.bestMatches.length) {
-      const selectedSymbol = resp.bestMatches[0]["1. symbol"];
-      console.log(selectedSymbol);
+      const selectedSymbol = resp.bestMatches[0]; // resp.bestMatches[0]["1. symbol"];
       setCurrentSymbol(selectedSymbol);
     } else {
       toast.error("No symbol found");
     }
-
-    setIsLoading(false);
-    toast.remove();
   };
+
+  React.useEffect(() => {
+    // setCurrentSymbol("GOOG");
+    SearchInput("GOOG");
+  }, []);
 
   return (
     <div>
@@ -79,9 +86,7 @@ const Header = () => {
               name="input-symbol"
               className="field input-text"
               placeholder="symbol"
-              defaultValue={currentSymbol}
-              //   value={inputSearch}
-              //   onChange={(evt) => setInputSearch(evt.target.value)}
+              defaultValue={currentSymbol["1. symbol"]}
             />
             <button onClick={() => SearchInput()}>Search</button>
           </div>

@@ -1,11 +1,19 @@
 .flex {
-    display: flex;
+  display: flex;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
 }
 .flex-row-center {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
-.space-between {justify-content: space-between;}
-.space-around {justify-content: space-around;}
+.space-between {
+  justify-content: space-between;
+}
+.space-around {
+  justify-content: space-around;
+}
