@@ -24,3 +24,12 @@
   display: flex;
   flex-direction: row;
 }
+
+.text-light {
+  color: #ccc;
+}
+
+#select-duration-container {
+  display: flex;
+  column-gap: 20px;
+}

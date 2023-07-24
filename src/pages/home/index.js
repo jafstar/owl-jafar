@@ -4,14 +4,17 @@ import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import toast from "react-hot-toast";
 
+import {
+  API_KEY,
+  _HEIGHT,
+  _COLOR_UP,
+  _COLOR_DOWN,
+  _COLOR_VOLUME,
+} from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
 import { TEST_DATA } from "../../../mockdata/TIME_SERIES_DAILY_AAPL";
 import "./styles.css";
-
-const API_KEY = process.env.ALPHAVANTAGE_API;
-// const _WIDTH = window.innerWidth * 0.7;
-const _HEIGHT = 600;
 
 const chartOptions = {
   layout: {
@@ -120,7 +123,7 @@ const Home = () => {
 
     // Series - Volume
     const volumeSeries = chart.addHistogramSeries({
-      color: "#26a69a",
+      color: _COLOR_VOLUME,
       priceFormat: {
         type: "volume",
       },
@@ -152,8 +155,84 @@ const Home = () => {
     setVolumeSeries(volumeSeries);
     setCandlestickSeries(tmpCandlestickSeries);
     setAreaSeries(tmpAreaSeries);
+
+    updateAreaSeries(tmpAreaSeries, _COLOR_UP);
+
     // UI Toast
     toast.remove();
+  };
+
+  const changeSeries = (seriesType) => {
+    // setStateSeries(areaSeries);
+    // console.log("areaSeries: ", areaSeries);
+
+    let areaColor = _COLOR_UP;
+    let candleColor = {
+      up: _COLOR_UP,
+      down: _COLOR_DOWN,
+    };
+
+    if (seriesType === "line") {
+      candleColor = {
+        up: "transparent",
+        down: "transparent",
+      };
+    }
+
+    if (seriesType === "candle") {
+      areaColor = "transparent";
+    }
+
+    updateAreaSeries(areaSeries, areaColor);
+    updateCandleSeries(candlestickSeries, candleColor);
+  };
+
+  const updateCandleSeries = (tmpCandleSeries, candleColor) => {
+    tmpCandleSeries.applyOptions({
+      upColor: candleColor.up,
+      downColor: candleColor.down,
+      borderVisible: false,
+      wickUpColor: candleColor.up,
+      wickDownColor: candleColor.down,
+    });
+  };
+
+  const updateAreaSeries = (tmpAreaSeries, areaColor) => {
+    tmpAreaSeries.applyOptions({
+      topColor: areaColor,
+      bottomColor:
+        areaColor === "transparent"
+          ? "rgba(41, 98, 255, 0.28)"
+          : "rgba(0, 0, 0, 0)",
+      lineColor: areaColor,
+      lineWidth: 2,
+    });
+  };
+
+  /**
+   * @name changeDuration
+   * @type Function
+   * @param {String} durationType
+   */
+  const changeDuration = (durationType) => {
+    switch (durationType) {
+      case "daily":
+        console.log("is daily: ", durationType === "daily");
+      case "5d":
+        console.log("is 5d: ", durationType === "5d");
+        break;
+      case "mtd":
+        console.log("is mtd: ", durationType === "mtd");
+        break;
+      case "l3y":
+        console.log("is l3y: ", durationType === "l3y");
+        break;
+      case "l5y":
+        console.log("is l5y: ", durationType === "l5y");
+        break;
+      default:
+        console.log("durationType: ", durationType);
+    }
   };
 
   /**
@@ -190,29 +269,61 @@ const Home = () => {
             <h2>{stockSymbol && stockSymbol["1. symbol"]}</h2>
             <h2>{stockSymbol && stockSymbol["2. name"]}</h2>
           </div>
+          {/* <!-- CHART SELECT DURATION --> */}
+          <div id="select-duration-container" className="text-light">
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("daily")}
+                defaultChecked
+              />
+              Daily
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("5d")}
+              />
+              Last 5 Days
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("mtd")}
+              />
+              Month to Date
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("l3y")}
+              />
+              Last 3 Years
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("l5y")}
+              />
+              Last 5 Years
+            </label>
+          </div>
 
+          {/* <!-- CHART CONTAINER --> */}
           <div id="chartContainer"></div>
-          <div>
+
+          {/* <!-- CHART SERIES SELECT --> */}
+          <div className="text-light">
             <label>
               <input
                 type="radio"
                 name="chart_type"
-                onClick={() => {
-                  setStateSeries(candlestickSeries);
-                  console.log("candlestickSeries: ", candlestickSeries);
-                  candlestickSeries.applyOptions({
-                    upColor: "#26a69a",
-                    downColor: "#ef5350",
-                    borderVisible: false,
-                    wickUpColor: "#26a69a",
-                    wickDownColor: "#ef5350",
-                  });
-                  areaSeries.applyOptions({
-                    topColor: "transparent",
-                    bottomColor: "rgba(41, 98, 255, 0)",
-                    lineColor: "transparent",
-                  });
-                }}
+                onClick={() => changeSeries("candle")}
               />
               Candlestick Chart
             </label>
@@ -220,24 +331,8 @@ const Home = () => {
               <input
                 type="radio"
                 name="chart_type"
-                onClick={() => {
-                  setStateSeries(areaSeries);
-                  console.log("areaSeries: ", areaSeries);
-                  areaSeries.applyOptions({
-                    topColor: "#2962FF",
-                    bottomColor: "rgba(41, 98, 255, 0.28)",
-                    lineColor: "#2962FF",
-                    lineWidth: 2,
-                  });
-
-                  candlestickSeries.applyOptions({
-                    upColor: "transparent",
-                    downColor: "transparent",
-                    borderVisible: false,
-                    wickUpColor: "transparent",
-                    wickDownColor: "transparent",
-                  });
-                }}
+                onClick={() => changeSeries("line")}
+                defaultChecked
               />
               Line Chart
             </label>
