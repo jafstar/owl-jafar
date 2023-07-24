@@ -1,10 +1,10 @@
 import React from "react";
 import { createChart } from "lightweight-charts";
-import { DateTime } from "luxon";
 import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import toast from "react-hot-toast";
 
+import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
 import { TEST_DATA } from "../../../mockdata/TIME_SERIES_DAILY_AAPL";
 import "./styles.css";
@@ -15,10 +15,10 @@ const _HEIGHT = 600;
 
 const chartOptions = {
   layout: {
-    textColor: "white",
+    textColor: "#ccc",
     background: {
       type: "solid",
-      color: "black",
+      color: "#111",
     },
   },
   rightPriceScale: {
@@ -27,6 +27,7 @@ const chartOptions = {
 };
 
 const Home = () => {
+  // Refs
   const chartRef = React.useRef({
     api() {
       if (!this._api) {
@@ -42,9 +43,14 @@ const Home = () => {
     },
     free(series) {
       if (this._api) {
-        this._api.removeSeries(stateSeries);
+        this._api.removeSeries(series);
         this._api.remove();
         this._api = undefined;
+      }
+    },
+    removeSeries(series) {
+      if (this._api) {
+        this._api.removeSeries(series);
       }
     },
   });
@@ -54,8 +60,15 @@ const Home = () => {
 
   // State Local
   const [stateSeries, setStateSeries] = React.useState(null);
-
+  const [volumeSeries, setVolumeSeries] = React.useState(null);
+  const [candlestickSeries, setCandlestickSeries] = React.useState(null);
+  const [areaSeries, setAreaSeries] = React.useState(null);
+  /**
+   * callAPI
+   * @param {String} querySymbol
+   */
   const callAPI = async (querySymbol) => {
+    // Toast
     toast.loading("Getting stock info...");
 
     // Remove prev series
@@ -74,49 +87,30 @@ const Home = () => {
       }, 2000);
     });
 
-    console.log("mock resp: ", resp);
     const respAPI = resp["Time Series (Daily)"];
 
-    const apiSeries = Object.entries(respAPI).map((itm) => {
-      return {
-        time: String(itm[0]),
-        open: Number(itm[1]["1. open"]),
-        high: Number(itm[1]["2. high"]),
-        low: Number(itm[1]["3. low"]),
-        close: Number(itm[1]["4. close"]),
-      };
-    });
-    const apiArea = Object.entries(respAPI).map((itm) => {
-      return {
-        time: String(itm[0]),
-        value: Number(itm[1]["4. close"]),
-      };
-    });
-    const apiVolume = Object.entries(respAPI).map((itm) => {
-      return {
-        time: String(itm[0]),
-        volume: Number(itm[1]["5. volume"]),
-        color: "#26a69a",
-      };
-    });
+    const { chartData, volumeData, areaData } = formatAPIData(respAPI);
 
+    // Create or Reference Chart
     const chart = chartRef.current.api();
 
-    // const candlestickSeries = chart.addCandlestickSeries({
-    //   upColor: "#26a69a",
-    //   downColor: "#ef5350",
-    //   borderVisible: false,
-    //   wickUpColor: "#26a69a",
-    //   wickDownColor: "#ef5350",
-    // });
+    // Series - Candlestick
+    const tmpCandlestickSeries = chart.addCandlestickSeries({
+      upColor: "transparent",
+      downColor: "transparent",
+      borderVisible: false,
+      wickUpColor: "transparent",
+      wickDownColor: "transparent",
+    });
 
-    const areaSeries = chart.addAreaSeries({
-      topColor: "#2962FF",
-      bottomColor: "rgba(41, 98, 255, 0.28)",
-      lineColor: "#2962FF",
+    // Series - Area
+    const tmpAreaSeries = chart.addAreaSeries({
+      topColor: "transparent",
+      bottomColor: "rgba(41, 98, 255, 0)",
+      lineColor: "transparent",
       lineWidth: 2,
     });
-    areaSeries.priceScale().applyOptions({
+    tmpAreaSeries.priceScale().applyOptions({
       scaleMargins: {
         // positioning the price scale for the area series
         top: 0.1,
@@ -124,6 +118,7 @@ const Home = () => {
       },
     });
 
+    // Series - Volume
     const volumeSeries = chart.addHistogramSeries({
       color: "#26a69a",
       priceFormat: {
@@ -142,75 +137,28 @@ const Home = () => {
         bottom: 0,
       },
     });
-    // Init vars
-    let chartData;
-    let volumeData;
-    let areaData;
 
-    // Check Time
-    const d1 = DateTime.fromISO(apiSeries[0].time);
-    const d2 = DateTime.fromISO(apiSeries[apiSeries.length - 1].time);
-
-    if (d2 > d1) {
-      chartData = apiSeries;
-      volumeData = apiVolume;
-      areaData = apiArea;
-    } else {
-      chartData = apiSeries.reverse();
-      volumeData = apiVolume.reverse();
-      areaData = apiArea.reverse();
-    }
-
-    // DEBUG
-    // console.log("resp: ", resp);
-    // console.log(respAPI);
-    // console.log("chart: ", chart);
-    // console.log("apiSeries: ", apiSeries);
-    // console.log("d2 < d1 :", d2 < d1);
-    // console.log("d2 > d1 :", d2 > d1);
-    // console.log("chartData: ", chartData);
-    // console.log(candlestickSeries);
-    console.log("chartData: ", chartData);
-    console.log("areaData: ", areaData);
-
-    console.log("volumeData: ", volumeData);
     // Set Data
-    // candlestickSeries.setData([...chartData]);
-    areaSeries.setData([
-      { time: "2018-10-19", value: 54.9 },
-      { time: "2018-10-22", value: 54.98 },
-      { time: "2018-10-23", value: 57.21 },
-      { time: "2018-10-24", value: 57.42 },
-      { time: "2018-10-25", value: 56.43 },
-      { time: "2018-10-26", value: 55.51 },
-      { time: "2018-10-29", value: 56.48 },
-      { time: "2018-10-30", value: 58.18 },
-      { time: "2018-10-31", value: 57.09 },
-      { time: "2018-11-01", value: 56.05 },
-    ]);
-    volumeSeries.setData([
-      { time: "2018-10-19", value: 19103293.0, color: "#26a69a" },
-      { time: "2018-10-22", value: 21737523.0, color: "#26a69a" },
-      { time: "2018-10-23", value: 29328713.0, color: "#26a69a" },
-      { time: "2018-10-24", value: 37435638.0, color: "#26a69a" },
-      { time: "2018-10-25", value: 25269995.0, color: "#26a69a" },
-      { time: "2018-10-26", value: 24973311.0, color: "#26a69a" },
-      { time: "2018-10-29", value: 22103692.0, color: "#26a69a" },
-      { time: "2018-10-30", value: 25231199.0, color: "#26a69a" },
-      { time: "2018-10-31", value: 24214427.0, color: "#26a69a" },
-      { time: "2018-11-01", value: 22533201.0, color: "#26a69a" },
-    ]);
+    tmpCandlestickSeries.setData([...chartData]);
+    tmpAreaSeries.setData([...areaData]);
+    volumeSeries.setData([...volumeData]);
 
     // Adjust chart
     chart.resize(window.innerWidth * 0.7, _HEIGHT);
     chart.timeScale().fitContent();
 
     // Set State
-    // setStateSeries(candlestickSeries);
-
+    setStateSeries(tmpCandlestickSeries);
+    setVolumeSeries(volumeSeries);
+    setCandlestickSeries(tmpCandlestickSeries);
+    setAreaSeries(tmpAreaSeries);
     // UI Toast
     toast.remove();
   };
+
+  /**
+   * EFFECTS
+   */
 
   React.useEffect(() => {
     if (stockSymbol) {
@@ -244,6 +192,56 @@ const Home = () => {
           </div>
 
           <div id="chartContainer"></div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="chart_type"
+                onClick={() => {
+                  setStateSeries(candlestickSeries);
+                  console.log("candlestickSeries: ", candlestickSeries);
+                  candlestickSeries.applyOptions({
+                    upColor: "#26a69a",
+                    downColor: "#ef5350",
+                    borderVisible: false,
+                    wickUpColor: "#26a69a",
+                    wickDownColor: "#ef5350",
+                  });
+                  areaSeries.applyOptions({
+                    topColor: "transparent",
+                    bottomColor: "rgba(41, 98, 255, 0)",
+                    lineColor: "transparent",
+                  });
+                }}
+              />
+              Candlestick Chart
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_type"
+                onClick={() => {
+                  setStateSeries(areaSeries);
+                  console.log("areaSeries: ", areaSeries);
+                  areaSeries.applyOptions({
+                    topColor: "#2962FF",
+                    bottomColor: "rgba(41, 98, 255, 0.28)",
+                    lineColor: "#2962FF",
+                    lineWidth: 2,
+                  });
+
+                  candlestickSeries.applyOptions({
+                    upColor: "transparent",
+                    downColor: "transparent",
+                    borderVisible: false,
+                    wickUpColor: "transparent",
+                    wickDownColor: "transparent",
+                  });
+                }}
+              />
+              Line Chart
+            </label>
+          </div>
         </div>
         <div>
           <h1>{stockSymbol && stockSymbol["2. name"]}</h1>
@@ -255,33 +253,3 @@ const Home = () => {
 };
 
 export { Home as default };
-
-/*
-1. symbol
-: 
-"GOOG"
-2. name
-: 
-"Alphabet Inc - Class C"
-3. type
-: 
-"Equity"
-4. region
-: 
-"United States"
-5. marketOpen
-: 
-"09:30"
-6. marketClose
-: 
-"16:00"
-7. timezone
-: 
-"UTC-04"
-8. currency
-: 
-"USD"
-9. matchScore
-: 
-"1.0000"
-*/

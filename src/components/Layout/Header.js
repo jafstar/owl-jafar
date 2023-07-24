@@ -71,9 +71,21 @@ const Header = () => {
   return (
     <div>
       <header className="flex space-between">
-        <div>
+        <div className="flex">
           <div id="logo">
             <h1>Old-Well Labs</h1>
+          </div>
+
+          <div id="header-nav">
+            <Link to="/">
+              <span>Watchlist</span>
+            </Link>
+            <Link to="/reports">
+              <span>Chart</span>
+            </Link>
+            <Link to="/gauges">
+              <span>News</span>
+            </Link>
           </div>
         </div>
 
@@ -90,18 +102,6 @@ const Header = () => {
             />
             <button onClick={() => SearchInput()}>Search</button>
           </div>
-        </div>
-
-        <div id="header-nav">
-          <Link to="/">
-            <span>Watchlist</span>
-          </Link>
-          <Link to="/reports">
-            <span>Chart</span>
-          </Link>
-          <Link to="/gauges">
-            <span>News</span>
-          </Link>
         </div>
       </header>
     </div>
