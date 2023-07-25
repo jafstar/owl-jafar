@@ -13,7 +13,13 @@ import {
 } from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
-import { TEST_DATA } from "../../../mockdata/TIME_SERIES_DAILY_AAPL";
+import {
+  DAILY_AAPL,
+  DAILY_GOOG,
+  DAILY_IBM,
+} from "../../../mockdata/TIME_SERIES_DAILY";
+import { DURATION_TEST_DATA } from "../../../mockdata/DURATION_5D_AAPL";
+
 import "./styles.css";
 
 const chartOptions = {
@@ -40,15 +46,21 @@ const Home = () => {
           chartOptions
         );
 
+        this.addSeriesCandlestick();
+        this.addSeriesArea();
+        this.addSeriesVolume();
+
         // this._api.timeScale().fitContent();
       }
       return this._api;
     },
-    free(series) {
+    free() {
       if (this._api) {
-        this._api.removeSeries(series);
-        this._api.remove();
-        this._api = undefined;
+        // this._api.removeSeries(this._seriesArea);
+        // this._api.removeSeries(this._seriesCandle);
+        // this._api.removeSeries(this._seriesVolume);
+        // this._api.remove();
+        // this._api = undefined;
       }
     },
     removeSeries(series) {
@@ -56,37 +68,114 @@ const Home = () => {
         this._api.removeSeries(series);
       }
     },
+    addSeriesCandlestick() {
+      // Series - Candlestick
+      if (!this._seriesCandle) {
+        this._seriesCandle = this._api.addCandlestickSeries({
+          upColor: "transparent",
+          downColor: "transparent",
+          borderVisible: false,
+          wickUpColor: "transparent",
+          wickDownColor: "transparent",
+        });
+      }
+      return this._seriesCandle;
+    },
+    seriesCandle() {
+      return this._seriesCandle ? this._seriesCandle : null;
+    },
+    addSeriesArea() {
+      // Series - Candlestick
+      if (!this._seriesArea) {
+        // Series - Area
+        this._seriesArea = this._api.addAreaSeries({
+          topColor: "transparent",
+          bottomColor: "rgba(41, 98, 255, 0)",
+          lineColor: "transparent",
+          lineWidth: 2,
+        });
+        this._seriesArea.priceScale().applyOptions({
+          scaleMargins: {
+            // positioning the price scale for the area series
+            top: 0.1,
+            bottom: 0.4,
+          },
+        });
+      }
+      return this._seriesArea;
+    },
+    seriesArea() {
+      return this._seriesArea ? this._seriesArea : null;
+    },
+    addSeriesVolume() {
+      if (!this._seriesVolume) {
+        // Series - Volume
+        this._seriesVolume = this._api.addHistogramSeries({
+          color: _COLOR_VOLUME,
+          priceFormat: {
+            type: "volume",
+          },
+          priceScaleId: "", // set as an overlay by setting a blank priceScaleId
+          // set the positioning of the volume series
+          scaleMargins: {
+            top: 0.7, // highest point of the series will be 70% away from the top
+            bottom: 0,
+          },
+        });
+        this._seriesVolume.priceScale().applyOptions({
+          scaleMargins: {
+            top: 0.7, // highest point of the series will be 70% away from the top
+            bottom: 0,
+          },
+        });
+      }
+      return this._seriesVolume;
+    },
+    seriesVolume() {
+      return this._seriesVolume ? this._seriesVolume : null;
+    },
   });
 
   // State Store
   const stockSymbol = useRecoilValue(atomCurrentSymbol);
 
   // State Local
-  const [stateSeries, setStateSeries] = React.useState(null);
-  const [volumeSeries, setVolumeSeries] = React.useState(null);
-  const [candlestickSeries, setCandlestickSeries] = React.useState(null);
-  const [areaSeries, setAreaSeries] = React.useState(null);
+  // const [stateSeries, setStateSeries] = React.useState(null);
+  // const [volumeSeries, setVolumeSeries] = React.useState(null);
+  // const [candlestickSeries, setCandlestickSeries] = React.useState(null);
+  // const [areaSeries, setAreaSeries] = React.useState(null);
   /**
    * callAPI
    * @param {String} querySymbol
    */
   const callAPI = async (querySymbol) => {
     // Toast
-    toast.loading("Getting stock info...");
+    toast.loading(`Loading ${querySymbol} ...`);
 
     // Remove prev series
-    chartRef.current.free(stateSeries);
+    chartRef.current.free();
 
-    /*
-    const querySeries = "TIME_SERIES_DAILY";
-    const url = `https://www.alphavantage.co/query?function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
-    const getData = await fetch(url);
-    const resp = await getData.json();
-    */
+    // const querySeries = "TIME_SERIES_DAILY";
+    // const url = `https://www.alphavantage.co/query?function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
+    // const getData = await fetch(url);
+    // const resp = await getData.json();
+
     // MOCK DATA
-    const resp = await new Promise((resolve) => {
+    const resp = await new Promise((resolve, reject) => {
       setTimeout(() => {
-        resolve(TEST_DATA);
+        switch (querySymbol.toLocaleLowerCase()) {
+          case "aapl":
+            resolve(DAILY_AAPL);
+            break;
+          case "goog":
+            resolve(DAILY_GOOG);
+            break;
+          case "ibm":
+            resolve(DAILY_IBM);
+            break;
+          default:
+            reject(null);
+        }
       }, 2000);
     });
 
@@ -97,66 +186,28 @@ const Home = () => {
     // Create or Reference Chart
     const chart = chartRef.current.api();
 
-    // Series - Candlestick
-    const tmpCandlestickSeries = chart.addCandlestickSeries({
-      upColor: "transparent",
-      downColor: "transparent",
-      borderVisible: false,
-      wickUpColor: "transparent",
-      wickDownColor: "transparent",
-    });
+    console.log("chart: ", chart);
 
-    // Series - Area
-    const tmpAreaSeries = chart.addAreaSeries({
-      topColor: "transparent",
-      bottomColor: "rgba(41, 98, 255, 0)",
-      lineColor: "transparent",
-      lineWidth: 2,
-    });
-    tmpAreaSeries.priceScale().applyOptions({
-      scaleMargins: {
-        // positioning the price scale for the area series
-        top: 0.1,
-        bottom: 0.4,
-      },
-    });
-
-    // Series - Volume
-    const volumeSeries = chart.addHistogramSeries({
-      color: _COLOR_VOLUME,
-      priceFormat: {
-        type: "volume",
-      },
-      priceScaleId: "", // set as an overlay by setting a blank priceScaleId
-      // set the positioning of the volume series
-      scaleMargins: {
-        top: 0.7, // highest point of the series will be 70% away from the top
-        bottom: 0,
-      },
-    });
-    volumeSeries.priceScale().applyOptions({
-      scaleMargins: {
-        top: 0.7, // highest point of the series will be 70% away from the top
-        bottom: 0,
-      },
-    });
+    const tmpCandlestickSeries = chartRef.current.seriesCandle();
+    const tmpAreaSeries = chartRef.current.seriesArea();
+    const tmpVolumeSeries = chartRef.current.seriesVolume();
 
     // Set Data
     tmpCandlestickSeries.setData([...chartData]);
     tmpAreaSeries.setData([...areaData]);
-    volumeSeries.setData([...volumeData]);
+    tmpVolumeSeries.setData([...volumeData]);
 
     // Adjust chart
     chart.resize(window.innerWidth * 0.7, _HEIGHT);
     chart.timeScale().fitContent();
 
     // Set State
-    setStateSeries(tmpCandlestickSeries);
-    setVolumeSeries(volumeSeries);
-    setCandlestickSeries(tmpCandlestickSeries);
-    setAreaSeries(tmpAreaSeries);
+    // setStateSeries(tmpCandlestickSeries);
+    // setVolumeSeries(tmpVolumeSeries);
+    // setCandlestickSeries(tmpCandlestickSeries);
+    // setAreaSeries(tmpAreaSeries);
 
-    updateAreaSeries(tmpAreaSeries, _COLOR_UP);
+    updateAreaSeries(_COLOR_UP);
 
     // UI Toast
     toast.remove();
@@ -183,11 +234,12 @@ const Home = () => {
       areaColor = "transparent";
     }
 
-    updateAreaSeries(areaSeries, areaColor);
-    updateCandleSeries(candlestickSeries, candleColor);
+    updateAreaSeries(areaColor);
+    updateCandleSeries(candleColor);
   };
 
-  const updateCandleSeries = (tmpCandleSeries, candleColor) => {
+  const updateCandleSeries = (candleColor) => {
+    const tmpCandleSeries = chartRef.current.seriesCandle();
     tmpCandleSeries.applyOptions({
       upColor: candleColor.up,
       downColor: candleColor.down,
@@ -197,7 +249,9 @@ const Home = () => {
     });
   };
 
-  const updateAreaSeries = (tmpAreaSeries, areaColor) => {
+  const updateAreaSeries = (areaColor) => {
+    const tmpAreaSeries = chartRef.current.seriesArea();
+
     tmpAreaSeries.applyOptions({
       topColor: areaColor,
       bottomColor:
@@ -214,12 +268,19 @@ const Home = () => {
    * @type Function
    * @param {String} durationType
    */
-  const changeDuration = (durationType) => {
+  const changeDuration = async (durationType) => {
+    let queryObject = {};
+
     switch (durationType) {
       case "daily":
         console.log("is daily: ", durationType === "daily");
       case "5d":
         console.log("is 5d: ", durationType === "5d");
+        queryObject = {
+          interval: "60min",
+          series: "TIME_SERIES_INTRADAY",
+          objName: "Time Series (60min)",
+        };
         break;
       case "mtd":
         console.log("is mtd: ", durationType === "mtd");
@@ -233,6 +294,26 @@ const Home = () => {
       default:
         console.log("durationType: ", durationType);
     }
+
+    // const querySymbol = stockSymbol["1. symbol"];
+    // const querySeries = queryObject.series;
+    // const url = `https://www.alphavantage.co/query?outputsize=compact&interval=${queryObject.interval}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
+    // const getData = await fetch(url);
+    // const resp = await getData.json();
+    // MOCK DATA
+    const resp = await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(DURATION_TEST_DATA);
+      }, 2000);
+    });
+
+    console.log("duration query: ", resp);
+
+    const respAPI = resp[queryObject.objName];
+
+    const { chartData, volumeData, areaData } = formatAPIData(respAPI);
+
+    console.log("chartData: ", chartData);
   };
 
   /**

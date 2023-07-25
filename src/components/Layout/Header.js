@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { atom, selector, DefaultValue, useRecoilState } from "recoil";
 
-import { TEST_DATA } from "../../../mockdata/SEARCH_QUERY_AAPL";
+import {
+  SEARCH_QUERY_AAPL,
+  SEARCH_QUERY_GOOG,
+  SEARCH_QUERY_IBM,
+} from "../../../mockdata/SEARCH_QUERY";
 import "./styles.css";
 
 const API_KEY = process.env.ALPHAVANTAGE_API;
@@ -46,9 +50,21 @@ const Header = () => {
     const resp = await getData.json();
     */
     // MOCK DATA
-    const resp = await new Promise((resolve) => {
+    const resp = await new Promise((resolve, reject) => {
       setTimeout(() => {
-        resolve(TEST_DATA);
+        switch (currentInputVal.toLocaleLowerCase()) {
+          case "aapl":
+            resolve(SEARCH_QUERY_AAPL);
+            break;
+          case "goog":
+            resolve(SEARCH_QUERY_GOOG);
+            break;
+          case "ibm":
+            resolve(SEARCH_QUERY_IBM);
+            break;
+          default:
+            reject(null);
+        }
       }, 2000);
     });
 

@@ -1,0 +1,5 @@
+import { DAILY_GOOG } from "./TIME_SERIES_DAILY_GOOG";
+import { DAILY_AAPL } from "./TIME_SERIES_DAILY_AAPL";
+import { DAILY_IBM } from "./TIME_SERIES_DAILY_IBM";
+
+export { DAILY_AAPL, DAILY_GOOG, DAILY_IBM };

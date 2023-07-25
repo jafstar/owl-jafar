@@ -1,4 +1,4 @@
-export const TEST_DATA = {
+export const SEARCH_QUERY_GOOG = {
   bestMatches: [
     {
       "1. symbol": "GOOG",

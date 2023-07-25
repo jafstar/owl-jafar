@@ -1,4 +1,4 @@
-export const TEST_DATA = {
+export const SEARCH_QUERY_AAPL = {
   bestMatches: [
     {
       "1. symbol": "AAPL",

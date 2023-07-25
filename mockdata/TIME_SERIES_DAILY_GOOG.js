@@ -1,4 +1,4 @@
-export const TEST_DATA = {
+export const DAILY_GOOG = {
   "Meta Data": {
     "1. Information": "Daily Prices (open, high, low, close) and Volumes",
     "2. Symbol": "GOOG",
