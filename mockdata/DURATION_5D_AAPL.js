@@ -1,4 +1,4 @@
-export const DURATION_TEST_DATA = {
+export const DURATION_5D_AAPL = {
   "Meta Data": {
     "1. Information":
       "Intraday (60min) open, high, low, close prices and volume",

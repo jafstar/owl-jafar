@@ -81,7 +81,7 @@ const Header = () => {
 
   React.useEffect(() => {
     // setCurrentSymbol("GOOG");
-    SearchInput("GOOG");
+    SearchInput("AAPL");
   }, []);
 
   return (

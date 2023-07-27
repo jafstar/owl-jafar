@@ -21,7 +21,7 @@ export const formatAPIData = (respAPI) => {
 
   const apiVolume = respArr.map((itm) => {
     return {
-      time: DateTime.fromISO(itm[0]).toFormat("yyyy-MM-dd"),
+      time: itm[0], //DateTime.fromISO(itm[0]).toFormat("yyyy-MM-dd"),
       value: Number(itm[1]["5. volume"]),
       color: "#26a69a",
     };

@@ -18,9 +18,28 @@ import {
   DAILY_GOOG,
   DAILY_IBM,
 } from "../../../mockdata/TIME_SERIES_DAILY";
-import { DURATION_TEST_DATA } from "../../../mockdata/DURATION_5D_AAPL";
+import {
+  DURATION_5D_AAPL,
+  DURATION_MTD_AAPL,
+} from "../../../mockdata/DURATION";
 
 import "./styles.css";
+
+function timeToLocal(originalTime) {
+  const parsedTime = Date.parse(originalTime) / 1000;
+  const d = new Date(parsedTime * 1000);
+  return (
+    Date.UTC(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate(),
+      d.getHours(),
+      d.getMinutes(),
+      d.getSeconds(),
+      d.getMilliseconds()
+    ) / 1000
+  );
+}
 
 const chartOptions = {
   layout: {
@@ -32,6 +51,13 @@ const chartOptions = {
   },
   rightPriceScale: {
     borderVisible: false,
+  },
+  localization: {
+    dateFormat: "yyyy-MM-dd HH:mm",
+    // timeFormatter: (businessDayOrTimestamp) => {
+    //   console.log("businessDayOrTimestamp: ", businessDayOrTimestamp);
+    //   return Date(businessDayOrTimestamp); //or whatever JS formatting you want here
+    // },
   },
 };
 
@@ -148,6 +174,8 @@ const Home = () => {
    * callAPI
    * @param {String} querySymbol
    */
+
+  /*
   const callAPI = async (querySymbol) => {
     // Toast
     toast.loading(`Loading ${querySymbol} ...`);
@@ -212,6 +240,7 @@ const Home = () => {
     // UI Toast
     toast.remove();
   };
+*/
 
   const changeSeries = (seriesType) => {
     // setStateSeries(areaSeries);
@@ -269,7 +298,12 @@ const Home = () => {
    * @param {String} durationType
    */
   const changeDuration = async (durationType) => {
+    // Toast
+    toast.loading(`Loading ${durationType} ...`);
     let queryObject = {};
+
+    // Remove prev series
+    chartRef.current.free();
 
     switch (durationType) {
       case "daily":
@@ -284,6 +318,11 @@ const Home = () => {
         break;
       case "mtd":
         console.log("is mtd: ", durationType === "mtd");
+        queryObject = {
+          interval: null,
+          series: "TIME_SERIES_DAILY",
+          objName: "Time Series (Daily)",
+        };
         break;
       case "l3y":
         console.log("is l3y: ", durationType === "l3y");
@@ -297,13 +336,26 @@ const Home = () => {
 
     // const querySymbol = stockSymbol["1. symbol"];
     // const querySeries = queryObject.series;
-    // const url = `https://www.alphavantage.co/query?outputsize=compact&interval=${queryObject.interval}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
+    // const queryInterval = queryObject.interval
+    //   ? "&interval=" + queryObject.interval
+    //   : "";
+    // const url = `https://www.alphavantage.co/query?outputsize=compact${queryInterval}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
     // const getData = await fetch(url);
     // const resp = await getData.json();
     // MOCK DATA
     const resp = await new Promise((resolve) => {
       setTimeout(() => {
-        resolve(DURATION_TEST_DATA);
+        switch (durationType) {
+          case "5d":
+            resolve(DURATION_5D_AAPL);
+            break;
+          case "mtd":
+            resolve(DURATION_MTD_AAPL);
+            break;
+          default:
+            reject(null);
+        }
+        // resolve(DURATION_5D_AAPL);
       }, 2000);
     });
 
@@ -314,6 +366,57 @@ const Home = () => {
     const { chartData, volumeData, areaData } = formatAPIData(respAPI);
 
     console.log("chartData: ", chartData);
+
+    let tmpChartData = chartData;
+    let tmpAreaData = areaData;
+    let tmpVolData = volumeData;
+
+    // if (durationType === "5d") {
+    tmpChartData = chartData.map((itm) => {
+      return {
+        ...itm,
+        time: Date.parse(itm.time) / 1000, // In seconds (https://tradingview.github.io/lightweight-charts/docs/api#utctimestamp)
+      };
+    });
+    tmpAreaData = areaData.map((itm) => {
+      return {
+        ...itm,
+        time: Date.parse(itm.time) / 1000,
+      };
+    });
+
+    tmpVolData = volumeData.map((itm) => {
+      return {
+        ...itm,
+        time: Date.parse(itm.time) / 1000,
+      };
+    });
+    //   }
+    console.log("tmpAreaData: ", tmpAreaData);
+    console.log("tmpVolData: ", tmpVolData);
+
+    // Create or Reference Chart
+    const chart = chartRef.current.api();
+
+    console.log("chart: ", chart);
+
+    const tmpCandlestickSeries = chartRef.current.seriesCandle();
+    const tmpAreaSeries = chartRef.current.seriesArea();
+    const tmpVolumeSeries = chartRef.current.seriesVolume();
+
+    // Set Data
+    tmpCandlestickSeries.setData([...tmpChartData]);
+    tmpAreaSeries.setData([...tmpAreaData]);
+    tmpVolumeSeries.setData([...tmpVolData]);
+
+    // Adjust chart
+    chart.resize(window.innerWidth * 0.7, _HEIGHT);
+    chart.timeScale().fitContent();
+
+    updateAreaSeries(_COLOR_UP);
+
+    // UI Toast
+    toast.remove();
   };
 
   /**
@@ -323,7 +426,8 @@ const Home = () => {
   React.useEffect(() => {
     if (stockSymbol) {
       console.log("stock: ", stockSymbol);
-      callAPI(stockSymbol["1. symbol"]);
+      // callAPI(stockSymbol["1. symbol"]);
+      changeDuration("mtd");
     }
   }, [stockSymbol]);
 
@@ -352,7 +456,7 @@ const Home = () => {
           </div>
           {/* <!-- CHART SELECT DURATION --> */}
           <div id="select-duration-container" className="text-light">
-            <label>
+            {/* <label>
               <input
                 type="radio"
                 name="chart_duration"
@@ -360,7 +464,7 @@ const Home = () => {
                 defaultChecked
               />
               Daily
-            </label>
+            </label> */}
             <label>
               <input
                 type="radio"
@@ -373,6 +477,7 @@ const Home = () => {
               <input
                 type="radio"
                 name="chart_duration"
+                defaultChecked
                 onClick={() => changeDuration("mtd")}
               />
               Month to Date
