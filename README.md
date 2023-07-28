@@ -9,3 +9,11 @@
 > ENVRIONMENT_STAGE="DEV"
 
 > ENVRIONMENT_STAGE="PROD"
+
+## Install node_modules
+
+> yarn
+
+## Start App
+
+> yarn start
