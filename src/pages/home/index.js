@@ -3,6 +3,7 @@ import { createChart } from "lightweight-charts";
 import { Link } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import toast from "react-hot-toast";
+import { DateTime } from "luxon";
 
 import {
   API_KEY,
@@ -13,14 +14,17 @@ import {
 } from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
-import {
-  DAILY_AAPL,
-  DAILY_GOOG,
-  DAILY_IBM,
-} from "../../../mockdata/TIME_SERIES_DAILY";
+// import {
+//   DAILY_AAPL,
+//   DAILY_GOOG,
+//   DAILY_IBM,
+// } from "../../../mockdata/TIME_SERIES_DAILY";
 import {
   DURATION_5D_AAPL,
   DURATION_MTD_AAPL,
+  DURATION_L3Y_AAPL,
+  DURATION_L5Y_AAPL,
+  DURATION_L20Y_AAPL,
 } from "../../../mockdata/DURATION";
 
 import "./styles.css";
@@ -165,83 +169,6 @@ const Home = () => {
   // State Store
   const stockSymbol = useRecoilValue(atomCurrentSymbol);
 
-  // State Local
-  // const [stateSeries, setStateSeries] = React.useState(null);
-  // const [volumeSeries, setVolumeSeries] = React.useState(null);
-  // const [candlestickSeries, setCandlestickSeries] = React.useState(null);
-  // const [areaSeries, setAreaSeries] = React.useState(null);
-  /**
-   * callAPI
-   * @param {String} querySymbol
-   */
-
-  /*
-  const callAPI = async (querySymbol) => {
-    // Toast
-    toast.loading(`Loading ${querySymbol} ...`);
-
-    // Remove prev series
-    chartRef.current.free();
-
-    // const querySeries = "TIME_SERIES_DAILY";
-    // const url = `https://www.alphavantage.co/query?function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
-    // const getData = await fetch(url);
-    // const resp = await getData.json();
-
-    // MOCK DATA
-    const resp = await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        switch (querySymbol.toLocaleLowerCase()) {
-          case "aapl":
-            resolve(DAILY_AAPL);
-            break;
-          case "goog":
-            resolve(DAILY_GOOG);
-            break;
-          case "ibm":
-            resolve(DAILY_IBM);
-            break;
-          default:
-            reject(null);
-        }
-      }, 2000);
-    });
-
-    const respAPI = resp["Time Series (Daily)"];
-
-    const { chartData, volumeData, areaData } = formatAPIData(respAPI);
-
-    // Create or Reference Chart
-    const chart = chartRef.current.api();
-
-    console.log("chart: ", chart);
-
-    const tmpCandlestickSeries = chartRef.current.seriesCandle();
-    const tmpAreaSeries = chartRef.current.seriesArea();
-    const tmpVolumeSeries = chartRef.current.seriesVolume();
-
-    // Set Data
-    tmpCandlestickSeries.setData([...chartData]);
-    tmpAreaSeries.setData([...areaData]);
-    tmpVolumeSeries.setData([...volumeData]);
-
-    // Adjust chart
-    chart.resize(window.innerWidth * 0.7, _HEIGHT);
-    chart.timeScale().fitContent();
-
-    // Set State
-    // setStateSeries(tmpCandlestickSeries);
-    // setVolumeSeries(tmpVolumeSeries);
-    // setCandlestickSeries(tmpCandlestickSeries);
-    // setAreaSeries(tmpAreaSeries);
-
-    updateAreaSeries(_COLOR_UP);
-
-    // UI Toast
-    toast.remove();
-  };
-*/
-
   const changeSeries = (seriesType) => {
     // setStateSeries(areaSeries);
     // console.log("areaSeries: ", areaSeries);
@@ -312,6 +239,7 @@ const Home = () => {
         console.log("is 5d: ", durationType === "5d");
         queryObject = {
           interval: "60min",
+          custom: `outputsize=compact`,
           series: "TIME_SERIES_INTRADAY",
           objName: "Time Series (60min)",
         };
@@ -319,16 +247,37 @@ const Home = () => {
       case "mtd":
         console.log("is mtd: ", durationType === "mtd");
         queryObject = {
-          interval: null,
-          series: "TIME_SERIES_DAILY",
-          objName: "Time Series (Daily)",
+          interval: "60min",
+          custom: `&outputsize=full&month=${new Date().getFullYear()}-${new Date().getMonth()}`,
+          series: "TIME_SERIES_INTRADAY",
+          objName: "Time Series (60min)",
         };
         break;
       case "l3y":
         console.log("is l3y: ", durationType === "l3y");
+        queryObject = {
+          interval: null,
+          custom: `&outputsize=full`,
+          series: "TIME_SERIES_DAILY",
+          objName: "Time Series (Daily)",
+        };
         break;
       case "l5y":
         console.log("is l5y: ", durationType === "l5y");
+        queryObject = {
+          interval: null,
+          custom: `&outputsize=full`,
+          series: "TIME_SERIES_DAILY",
+          objName: "Time Series (Daily)",
+        };
+        break;
+      case "l20y":
+        console.log("is l20y: ", durationType === "l20y");
+        queryObject = {
+          interval: null,
+          series: "TIME_SERIES_WEEKLY",
+          objName: "Weekly Time Series",
+        };
         break;
       default:
         console.log("durationType: ", durationType);
@@ -339,9 +288,11 @@ const Home = () => {
     // const queryInterval = queryObject.interval
     //   ? "&interval=" + queryObject.interval
     //   : "";
-    // const url = `https://www.alphavantage.co/query?outputsize=compact${queryInterval}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
+    // const queryCustom = queryObject.custom ? queryObject.custom : "";
+    // const url = `https://www.alphavantage.co/query?${queryInterval}${queryCustom}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
     // const getData = await fetch(url);
     // const resp = await getData.json();
+
     // MOCK DATA
     const resp = await new Promise((resolve) => {
       setTimeout(() => {
@@ -352,40 +303,81 @@ const Home = () => {
           case "mtd":
             resolve(DURATION_MTD_AAPL);
             break;
+          case "l3y":
+            resolve(DURATION_L3Y_AAPL);
+            break;
+          case "l5y":
+            resolve(DURATION_L5Y_AAPL);
+            break;
+          case "l20y":
+            resolve(DURATION_L20Y_AAPL);
+            break;
           default:
             reject(null);
         }
-        // resolve(DURATION_5D_AAPL);
       }, 2000);
     });
 
     console.log("duration query: ", resp);
 
+    if (!resp || !resp[queryObject.objName]) {
+      // UI Toast
+      toast.remove();
+      // Toast
+      toast.error(`Error loading ${durationType} ...`);
+    }
+
     const respAPI = resp[queryObject.objName];
+
+    console.log("respAPI: ", respAPI);
 
     const { chartData, volumeData, areaData } = formatAPIData(respAPI);
 
     console.log("chartData: ", chartData);
 
+    let filterAreaData = null;
+    let filterVolData = [];
+
+    if (durationType === "l3y" || durationType === "l5y") {
+      filterAreaData = areaData.filter((itm, idx) => {
+        const dtItm = DateTime.fromISO(itm.time);
+        const dtNow = DateTime.now();
+
+        const diffInMonths = dtNow.diff(dtItm, "months").toObject();
+
+        // console.log("dtNow: ", dtNow);
+        // console.log("diffInMonths: ", diffInMonths);
+        const monthsCount = durationType === "l3y" ? 36 : 60;
+
+        if (diffInMonths.months < monthsCount) {
+          filterVolData = [...filterVolData, { ...volumeData[idx] }];
+          return true;
+        } else {
+          return false;
+        }
+      });
+    }
+    console.log("filterAreaData: ", filterAreaData);
+
     let tmpChartData = chartData;
-    let tmpAreaData = areaData;
-    let tmpVolData = volumeData;
+    let tmpAreaData = filterAreaData ? filterAreaData : areaData;
+    let tmpVolData = filterVolData.length ? filterVolData : volumeData;
 
     // if (durationType === "5d") {
-    tmpChartData = chartData.map((itm) => {
+    tmpChartData = tmpChartData.map((itm) => {
       return {
         ...itm,
         time: Date.parse(itm.time) / 1000, // In seconds (https://tradingview.github.io/lightweight-charts/docs/api#utctimestamp)
       };
     });
-    tmpAreaData = areaData.map((itm) => {
+    tmpAreaData = tmpAreaData.map((itm) => {
       return {
         ...itm,
         time: Date.parse(itm.time) / 1000,
       };
     });
 
-    tmpVolData = volumeData.map((itm) => {
+    tmpVolData = tmpVolData.map((itm) => {
       return {
         ...itm,
         time: Date.parse(itm.time) / 1000,
@@ -497,6 +489,14 @@ const Home = () => {
                 onClick={() => changeDuration("l5y")}
               />
               Last 5 Years
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="chart_duration"
+                onClick={() => changeDuration("l20y")}
+              />
+              Last 20 Years
             </label>
           </div>
 
