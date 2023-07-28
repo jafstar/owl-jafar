@@ -473,7 +473,12 @@ const Home = () => {
 
                             <div>
                               <div className="stock-news-source">
-                                {String(itm.source_domain).replace("www.", "")}
+                                <a href={itm.url} target="_blank">
+                                  {String(itm.source_domain).replace(
+                                    "www.",
+                                    ""
+                                  )}
+                                </a>
                               </div>
 
                               <div className="stock-news-title">
@@ -504,7 +509,12 @@ const Home = () => {
 
                             <div>
                               <div className="stock-news-source">
-                                {String(itm.source_domain).replace("www.", "")}
+                                <a href={itm.url} target="_blank">
+                                  {String(itm.source_domain).replace(
+                                    "www.",
+                                    ""
+                                  )}
+                                </a>
                               </div>
 
                               <div className="stock-news-title">

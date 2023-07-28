@@ -54,13 +54,24 @@
   width: 100px;
 }
 
-.stock-news-source {
+.stock-news-source,
+.stock-news-source a {
   font-weight: bold;
   font-size: 14px;
+  color: #999;
+  text-decoration: none;
+  padding-bottom: 5px;
+}
+
+.stock-news-source a:hover {
+  text-decoration: underline;
 }
 .stock-news-title {
   width: 100%;
   max-width: 500px;
+}
+#stock-news-container {
+  padding-bottom: 100px;
 }
 #stock-news-container > div.flex {
   column-gap: 5vw;
