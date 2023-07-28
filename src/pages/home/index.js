@@ -336,6 +336,7 @@ const Home = () => {
     console.log("chartData: ", chartData);
 
     let filterAreaData = null;
+    let filterCandleData = [];
     let filterVolData = [];
 
     if (durationType === "l3y" || durationType === "l5y") {
@@ -350,6 +351,7 @@ const Home = () => {
         const monthsCount = durationType === "l3y" ? 36 : 60;
 
         if (diffInMonths.months < monthsCount) {
+          filterCandleData = [...filterCandleData, { ...chartData[idx] }];
           filterVolData = [...filterVolData, { ...volumeData[idx] }];
           return true;
         } else {
@@ -358,10 +360,11 @@ const Home = () => {
       });
     }
     console.log("filterAreaData: ", filterAreaData);
+    console.log("filterCandleData: ", filterCandleData);
 
-    let tmpChartData = chartData;
     let tmpAreaData = filterAreaData ? filterAreaData : areaData;
     let tmpVolData = filterVolData.length ? filterVolData : volumeData;
+    let tmpChartData = filterCandleData.length ? filterCandleData : chartData;
 
     // if (durationType === "5d") {
     tmpChartData = tmpChartData.map((itm) => {
@@ -386,6 +389,7 @@ const Home = () => {
     //   }
     console.log("tmpAreaData: ", tmpAreaData);
     console.log("tmpVolData: ", tmpVolData);
+    console.log("tmpChartData: ", tmpChartData);
 
     // Create or Reference Chart
     const chart = chartRef.current.api();
