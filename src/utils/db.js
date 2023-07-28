@@ -9,7 +9,7 @@ export const addHistory = (data) => {
   };
 
   service.addData(tmpData).then((dbResp) => {
-    console.log("DB Add: ", dbResp);
+    // console.log("DB Add: ", dbResp);
   });
 };
 
@@ -17,7 +17,7 @@ export const getHistory = () => {
   const service = new SearchHistoryService();
 
   return service.getData().then((dbResp) => {
-    console.log("DB Get: ", dbResp);
+    // console.log("DB Get: ", dbResp);
     return dbResp;
   });
 };

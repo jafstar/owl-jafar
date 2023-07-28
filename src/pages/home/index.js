@@ -16,25 +16,7 @@ import {
 } from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
-// import { DAILY_GOOG, DAILY_IBM } from "../../../mockdata/TIME_SERIES_DAILY";
-// import {
-//   DURATION_5D_AAPL,
-//   DURATION_MTD_AAPL,
-//   DURATION_MTD_IBM,
-//   DURATION_MTD_GOOG,
-//   DURATION_L3Y_AAPL,
-//   DURATION_L5Y_AAPL,
-//   DURATION_L20Y_AAPL,
-// } from "../../../mockdata/DURATION";
-
-import {
-  GLOBAL_QUOTE_AAPL,
-  GLOBAL_QUOTE_GOOG,
-  GLOBAL_QUOTE_IBM,
-} from "../../../mockdata/GLOBAL_QUOTE";
-
 import { fetchData } from "../../utils/fetch";
-// import { NEWS_SENT_AAPL } from "../../../mockdata/NEWS_SENT_AAPL";
 import "./styles.css";
 
 const chartOptions = {
@@ -54,10 +36,6 @@ const chartOptions = {
   },
   localization: {
     dateFormat: "yyyy-MM-dd",
-    // timeFormatter: (businessDayOrTimestamp) => {
-    //   console.log("businessDayOrTimestamp: ", businessDayOrTimestamp);
-    //   return Date(businessDayOrTimestamp); //or whatever JS formatting you want here
-    // },
   },
 };
 
@@ -122,7 +100,6 @@ const Home = () => {
         });
         this._seriesArea.priceScale().applyOptions({
           scaleMargins: {
-            // positioning the price scale for the area series
             top: 0.1,
             bottom: 0.4,
           },
@@ -141,16 +118,15 @@ const Home = () => {
           priceFormat: {
             type: "volume",
           },
-          priceScaleId: "", // set as an overlay by setting a blank priceScaleId
-          // set the positioning of the volume series
+          priceScaleId: "",
           scaleMargins: {
-            top: 0.7, // highest point of the series will be 70% away from the top
+            top: 0.7,
             bottom: 0,
           },
         });
         this._seriesVolume.priceScale().applyOptions({
           scaleMargins: {
-            top: 0.7, // highest point of the series will be 70% away from the top
+            top: 0.7,
             bottom: 0,
           },
         });
@@ -173,9 +149,6 @@ const Home = () => {
   const [currentSeries, setCurrentSeries] = React.useState("line");
 
   const changeSeries = (seriesType) => {
-    // setStateSeries(areaSeries);
-    // console.log("areaSeries: ", areaSeries);
-
     let areaColor = _COLOR_AREA;
     let candleColor = {
       up: _COLOR_UP,
@@ -239,9 +212,7 @@ const Home = () => {
 
     switch (durationType) {
       case "daily":
-      // console.log("is daily: ", durationType === "daily");
       case "5d":
-        // console.log("is 5d: ", durationType === "5d");
         queryObject = {
           interval: "60min",
           custom: `outputsize=compact`,
@@ -250,7 +221,6 @@ const Home = () => {
         };
         break;
       case "mtd":
-        // console.log("is mtd: ", durationType === "mtd");
         queryObject = {
           interval: "60min",
           custom: `&outputsize=full&month=${new Date().getFullYear()}-${new Date().getMonth()}`,
@@ -259,7 +229,6 @@ const Home = () => {
         };
         break;
       case "l3y":
-        // console.log("is l3y: ", durationType === "l3y");
         queryObject = {
           interval: null,
           custom: `&outputsize=full`,
@@ -268,7 +237,6 @@ const Home = () => {
         };
         break;
       case "l5y":
-        // console.log("is l5y: ", durationType === "l5y");
         queryObject = {
           interval: null,
           custom: `&outputsize=full`,
@@ -277,7 +245,6 @@ const Home = () => {
         };
         break;
       case "l20y":
-        // console.log("is l20y: ", durationType === "l20y");
         queryObject = {
           interval: null,
           series: "TIME_SERIES_WEEKLY",
@@ -296,68 +263,22 @@ const Home = () => {
       : "";
     const queryCustom = queryObject.custom ? queryObject.custom : "";
 
-    // PROD QUERY
+    // QUERY
     const url = `https://www.alphavantage.co/query?${queryInterval}${queryCustom}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
-    // const getData = await fetch(url);
-    // const resp = await getData.json();
     const resp = await fetchData(url, {
       querySymbol: querySymbol,
       durationType: durationType,
     });
-    // MOCK DATA
-    // const resp = await new Promise((resolve) => {
-    //   setTimeout(() => {
-    //     switch (durationType) {
-    //       case "5d":
-    //         resolve(DURATION_5D_AAPL);
-    //         break;
-    //       case "mtd":
-    //         switch (querySymbol.toLocaleLowerCase()) {
-    //           case "aapl":
-    //             resolve(DURATION_MTD_AAPL);
-    //             break;
-    //           case "goog":
-    //             resolve(DURATION_MTD_GOOG);
-    //             break;
-    //           case "ibm":
-    //             resolve(DURATION_MTD_IBM);
-    //             break;
-    //           default:
-    //             reject(null);
-    //         }
-
-    //         break;
-    //       case "l3y":
-    //         resolve(DURATION_L3Y_AAPL);
-    //         break;
-    //       case "l5y":
-    //         resolve(DURATION_L5Y_AAPL);
-    //         break;
-    //       case "l20y":
-    //         resolve(DURATION_L20Y_AAPL);
-    //         break;
-    //       default:
-    //         reject(null);
-    //     }
-    //   }, 250);
-    // });
-
-    // console.log("duration query: ", resp);
 
     if (!resp || !resp[queryObject.objName]) {
       // UI Toast
       toast.remove();
-      // Toast
       toast.error(`Error loading ${durationType} ...`);
     }
 
     const respAPI = resp[queryObject.objName];
 
-    // console.log("respAPI: ", respAPI);
-
     const { chartData, volumeData, areaData } = formatAPIData(respAPI);
-
-    // console.log("chartData: ", chartData);
 
     let filterAreaData = null;
     let filterCandleData = [];
@@ -369,9 +290,6 @@ const Home = () => {
         const dtNow = DateTime.now();
 
         const diffInMonths = dtNow.diff(dtItm, "months").toObject();
-
-        // console.log("dtNow: ", dtNow);
-        // console.log("diffInMonths: ", diffInMonths);
         const monthsCount = durationType === "l3y" ? 36 : 60;
 
         if (diffInMonths.months < monthsCount) {
@@ -383,8 +301,6 @@ const Home = () => {
         }
       });
     }
-    // console.log("filterAreaData: ", filterAreaData);
-    // console.log("filterCandleData: ", filterCandleData);
 
     let tmpAreaData = filterAreaData ? filterAreaData : areaData;
     let tmpVolData = filterVolData.length ? filterVolData : volumeData;
@@ -410,14 +326,8 @@ const Home = () => {
       };
     });
 
-    // console.log("tmpAreaData: ", tmpAreaData);
-    // console.log("tmpVolData: ", tmpVolData);
-    // console.log("tmpChartData: ", tmpChartData);
-
     // Create or Reference Chart
     const chart = chartRef.current.api();
-
-    // console.log("chart: ", chart);
 
     const tmpCandlestickSeries = chartRef.current.seriesCandle();
     const tmpAreaSeries = chartRef.current.seriesArea();
@@ -427,8 +337,6 @@ const Home = () => {
     tmpCandlestickSeries.setData([...tmpChartData]);
     tmpAreaSeries.setData([...tmpAreaData]);
     tmpVolumeSeries.setData([...tmpVolData]);
-
-    console.log("window.innerWidth: ", window.innerWidth);
 
     // Adjust chart
     chart.resize(
@@ -452,72 +360,22 @@ const Home = () => {
   };
 
   const getGlobalQuote = async (tmpSymbol) => {
-    // Prod Query
+    // Query
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${tmpSymbol}&apikey=${API_KEY}`;
-    // const getData = await fetch(url);
-    // const resp = await getData.json();
     const resp = await fetchData(url, {
       symbol: tmpSymbol.toLocaleLowerCase(),
     });
 
-    // MOCK DATA
-    // const resp = await new Promise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     switch (tmpSymbol.toLocaleLowerCase()) {
-    //       case "aapl":
-    //         resolve(GLOBAL_QUOTE_AAPL);
-    //         break;
-    //       case "goog":
-    //         resolve(GLOBAL_QUOTE_GOOG);
-    //         break;
-    //       case "ibm":
-    //         resolve(GLOBAL_QUOTE_IBM);
-    //         break;
-    //       default:
-    //         reject(null);
-    //     }
-    //   }, 250);
-    // }).catch((err) => {
-    //   console.log(err);
-    // });
-
-    console.log("global quote: ", resp);
     setGlobalQuote(resp["Global Quote"]);
   };
 
   const getNewsData = async (tmpSymbol) => {
-    // Prod Query
+    // Query
     const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${tmpSymbol}&apikey=${API_KEY}`;
-    // const getData = await fetchData(url, {
-    //   symbol: tmpSymbol.toLocaleLowerCase(),
-    // });
-    // const resp = await getData.json();
     const resp = await fetchData(url, {
       symbol: tmpSymbol.toLocaleLowerCase(),
     });
 
-    // MOCK DATA
-    // const resp = await new Promise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     switch (tmpSymbol.toLocaleLowerCase()) {
-    //       case "aapl":
-    //         resolve(NEWS_SENT_AAPL);
-    //         break;
-    //       case "goog":
-    //         resolve(NEWS_SENT_AAPL);
-    //         break;
-    //       case "ibm":
-    //         resolve(NEWS_SENT_AAPL);
-    //         break;
-    //       default:
-    //         reject(null);
-    //     }
-    //   }, 250);
-    // }).catch((err) => {
-    //   console.log(err);
-    // });
-
-    console.log("news: ", resp);
     if (resp && resp.feed && resp.feed.length) {
       const filterNews = [...resp.feed].slice(0, 5);
       setNewsList(filterNews);
@@ -531,13 +389,9 @@ const Home = () => {
   /**
    * EFFECTS
    */
-
   React.useEffect(() => {
     if (stockSymbol) {
-      // console.log("stock: ", stockSymbol);
-      // callAPI(stockSymbol["1. symbol"]);
       changeDuration("mtd");
-
       const tmpStock = stockSymbol["1. symbol"];
       getNewsData(tmpStock);
       getGlobalQuote(tmpStock);

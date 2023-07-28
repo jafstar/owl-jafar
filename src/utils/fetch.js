@@ -64,7 +64,6 @@ export const fetchData = async (url, opt) => {
 };
 
 const MOCK_NEWS_SENTIMENT = (opt) => {
-  console.log("mocking news...");
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       switch (opt.symbol) {

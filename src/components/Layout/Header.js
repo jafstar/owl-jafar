@@ -4,15 +4,9 @@ import toast from "react-hot-toast";
 import { atom, selector, DefaultValue, useRecoilState } from "recoil";
 import { addHistory, getHistory } from "../../utils/db";
 
-// import {
-//   SEARCH_QUERY_AAPL,
-//   SEARCH_QUERY_GOOG,
-//   SEARCH_QUERY_IBM,
-// } from "../../../mockdata/SEARCH_QUERY";
 import { fetchData } from "../../utils/fetch";
+import { API_KEY } from "../../constants";
 import "./styles.css";
-
-const API_KEY = process.env.ALPHAVANTAGE_API;
 
 /**
  * Search Input
@@ -58,31 +52,9 @@ const Header = () => {
     toast.loading("Waiting...");
 
     const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currentInputVal}&apikey=${API_KEY}`;
-    // const getData = await fetch(url);
-    // const resp = await getData.json();
     const resp = await fetchData(url, {
       symbol: currentInputVal.toLocaleLowerCase(),
     });
-    // MOCK DATA
-    // const resp = await new Promise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     switch (currentInputVal.toLocaleLowerCase()) {
-    //       case "aapl":
-    //         resolve(SEARCH_QUERY_AAPL);
-    //         break;
-    //       case "goog":
-    //         resolve(SEARCH_QUERY_GOOG);
-    //         break;
-    //       case "ibm":
-    //         resolve(SEARCH_QUERY_IBM);
-    //         break;
-    //       default:
-    //         reject(null);
-    //     }
-    //   }, 250);
-    // }).catch((err) => {
-    //   console.log(err);
-    // });
 
     setIsLoading(false);
     toast.remove();
@@ -93,7 +65,7 @@ const Header = () => {
     }
 
     if (resp.bestMatches.length) {
-      const selectedSymbol = resp.bestMatches[0]; // resp.bestMatches[0]["1. symbol"];
+      const selectedSymbol = resp.bestMatches[0];
       setCurrentSymbol(selectedSymbol);
 
       let tmpHandHistory = {
@@ -112,10 +84,8 @@ const Header = () => {
    * @type EventFunc
    */
   const handleOnFocus = async () => {
-    // console.log("on focus...");
     setShowList(true);
     const tmpList = await getHistory();
-    console.log("tmpList: ", tmpList);
     setHistoryList([...tmpList]);
   };
 
@@ -125,7 +95,6 @@ const Header = () => {
    * @param {Event} e
    */
   const handleOnBlur = (e) => {
-    // console.log("on blur...", e);
     if (!e.target.className.includes("search-field")) {
       setShowList(false);
     }
@@ -133,7 +102,6 @@ const Header = () => {
 
   const handleOnKeyDown = (e) => {
     if (e.keyCode === 13) {
-      console.log("enter key...");
       if (inputRef.current.value !== "") {
         searchInput(inputRef.current.value);
       }
@@ -166,7 +134,6 @@ const Header = () => {
    * @type EffectFunc
    */
   React.useEffect(() => {
-    // setCurrentSymbol("GOOG");
     searchInput("AAPL");
   }, []);
 
