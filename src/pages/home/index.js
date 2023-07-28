@@ -12,6 +12,7 @@ import {
   _COLOR_UP,
   _COLOR_DOWN,
   _COLOR_VOLUME,
+  _COLOR_AREA,
 } from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
@@ -51,7 +52,7 @@ const chartOptions = {
     borderVisible: false,
   },
   localization: {
-    dateFormat: "yyyy-MM-dd HH:mm",
+    dateFormat: "yyyy-MM-dd",
     // timeFormatter: (businessDayOrTimestamp) => {
     //   console.log("businessDayOrTimestamp: ", businessDayOrTimestamp);
     //   return Date(businessDayOrTimestamp); //or whatever JS formatting you want here
@@ -166,14 +167,14 @@ const Home = () => {
   // State Local
   const [newsList, setNewsList] = React.useState(null);
   const [newsList2, setNewsList2] = React.useState(null);
-
+  const [showChangePerc, setShowChangePerc] = React.useState(true);
   const [globalQuote, setGlobalQuote] = React.useState(null);
 
   const changeSeries = (seriesType) => {
     // setStateSeries(areaSeries);
     // console.log("areaSeries: ", areaSeries);
 
-    let areaColor = _COLOR_UP;
+    let areaColor = _COLOR_AREA;
     let candleColor = {
       up: _COLOR_UP,
       down: _COLOR_DOWN,
@@ -424,7 +425,7 @@ const Home = () => {
     chart.resize(window.innerWidth * _WIDTH_RATIO, _HEIGHT);
     chart.timeScale().fitContent();
 
-    updateAreaSeries(_COLOR_UP);
+    updateAreaSeries(_COLOR_AREA);
 
     // UI Toast
     toast.remove();
@@ -545,24 +546,36 @@ const Home = () => {
                   <div id="global-quote-price" className="flex">
                     <h2>${Number(globalQuote["05. price"]).toFixed(2)}</h2>
                     <div>
-                      {Number(globalQuote["09. change"]).toFixed(2)}{" "}
-                      {parseFloat(globalQuote["10. change percent"]).toFixed(2)}
-                      %
+                      <div id="quote-indicator"></div>
+                      {showChangePerc ? (
+                        <span id="quote-change-perc">
+                          {" "}
+                          {parseFloat(
+                            globalQuote["10. change percent"]
+                          ).toFixed(2)}
+                          %
+                        </span>
+                      ) : (
+                        <span id="quote-change-price">
+                          {" "}
+                          {Number(globalQuote["09. change"]).toFixed(2)}{" "}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div id="global-quote-info" className="flex space-between">
                     <div>
-                      <span>Volume</span> <br />
-                      {globalQuote["06. volume"]}
+                      <span>Range</span>
+                      <br /> {Number(globalQuote["04. low"]).toFixed(2)} -{" "}
+                      {Number(globalQuote["03. high"]).toFixed(2)}
                     </div>
                     <div>
                       <span>Open</span>
                       <br /> {Number(globalQuote["02. open"]).toFixed(2)}
                     </div>
                     <div>
-                      <span>Range</span>
-                      <br /> {Number(globalQuote["04. low"]).toFixed(2)} -{" "}
-                      {Number(globalQuote["03. high"]).toFixed(2)}
+                      <span>Volume</span> <br />
+                      {globalQuote["06. volume"]}
                     </div>
                   </div>
                 </div>
@@ -572,8 +585,10 @@ const Home = () => {
 
           {/* <!-- CHART CONTAINER --> */}
           <div id="chartContainer"></div>
-          <div className="flex space-between">
-            {/* <!-- CHART SELECT DURATION --> */}
+
+          {/* <!-- CHART CONTROLS --> */}
+          <div id="chart-controls" className="flex space-between">
+            {/* <!-- SELECT DURATION --> */}
             <div id="select-duration-container" className="text-light">
               <label>
                 <input
@@ -623,7 +638,7 @@ const Home = () => {
               </label>
             </div>
 
-            {/* <!-- CHART SERIES SELECT --> */}
+            {/* <!-- SELECT SERIES --> */}
             <div id="select-series-container" className="text-light">
               <label>
                 <input

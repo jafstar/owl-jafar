@@ -23,7 +23,7 @@ export const formatAPIData = (respAPI) => {
     return {
       time: itm[0], //DateTime.fromISO(itm[0]).toFormat("yyyy-MM-dd"),
       value: Number(itm[1]["5. volume"]),
-      color: "#26a69a",
+      color: "#45c8e5", // #26a69a
     };
   });
 

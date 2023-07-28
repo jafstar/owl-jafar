@@ -10,6 +10,7 @@ header {
   background: #000;
   align-items: center;
   color: #333;
+  min-width: 340px;
 }
 header a {
   color: #333;
@@ -30,6 +31,7 @@ footer {
 
 #app-shell {
   height: 100vh;
+  min-width: 340px;
 }
 
 #header-nav {

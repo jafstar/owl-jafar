@@ -10,10 +10,10 @@
   align-items: center;
   column-gap: 10px;
   width: 240px;
-  height: 50px;
+  height: 30px;
   color: #fff;
   text-decoration: none;
-  font-size: 34px;
+  font-size: 23px;
   font-variant: small-caps;
   /* background: transparent url('../../public/images/'); */
   background-size: cover;
@@ -62,7 +62,9 @@
   width: 100%;
   max-width: 500px;
 }
-
+#stock-news-container > div.flex {
+  column-gap: 5vw;
+}
 #stock-news-container h2 {
   border-top: 0.5px solid #333;
 }
@@ -79,10 +81,15 @@
 
 #stock-name {
   height: 100px;
+  display: flex;
+  align-items: center;
+}
+#stock-name h2 {
+  font-size: 36px;
 }
 
 #global-quote-shell {
-  margin: 0 20px;
+  margin: 0 30px;
 }
 #global-quote {
   height: 100px;
@@ -94,10 +101,12 @@
 #global-quote-price {
   justify-content: flex-start;
   align-items: center;
-  column-gap: 60px;
+  column-gap: 80px;
+  height: 52px;
 }
 #global-quote-price h2 {
   padding: 20px 0;
+  font-size: 24px;
 }
 
 #global-quote-info {
@@ -302,4 +311,50 @@
   height: 8px;
   border-radius: 50%;
   background: transparent;
+}
+
+@media only screen and (max-width: 1285px) {
+  #stock-name {
+    height: 190px;
+  }
+}
+@media only screen and (max-width: 605px) {
+  #logo a {
+    width: 40px;
+    overflow: hidden;
+  }
+
+  #chart-controls {
+    align-items: center;
+    justify-content: center;
+  }
+
+  #stock-name h2 {
+    font-size: 24px;
+  }
+  .search-box {
+    margin: 0 20px 0 0;
+  }
+}
+@media only screen and (max-width: 450px) {
+  #global-quote-info {
+    width: 320px;
+    justify-content: flex-start;
+  }
+  #global-quote-info div {
+    margin-right: 20px;
+  }
+
+  #global-quote {
+    width: 100%;
+  }
+  .search-box {
+    width: 250px;
+  }
+  .search-box input {
+    font-size: 15px;
+  }
+  header.flex {
+    flex-wrap: nowrap;
+  }
 }
