@@ -306,9 +306,13 @@ const Home = () => {
         <div>
           <div id="stock-name" className="flex space-between">
             <h2>
-              [{stockSymbol && stockSymbol["1. symbol"]}] &nbsp;&nbsp;
+              {stockSymbol && `[${stockSymbol["1. symbol"]}]`} &nbsp;&nbsp;
               {stockSymbol && stockSymbol["2. name"]}
             </h2>
+
+            {!stockSymbol && (
+              <div id="empty-search">Please search for a stock symbol!</div>
+            )}
 
             <div id="global-quote-shell">
               {globalQuote && (
@@ -370,148 +374,151 @@ const Home = () => {
           <div id="chartContainer"></div>
 
           {/* <!-- CHART CONTROLS --> */}
-          <div id="chart-controls" className="flex space-between">
-            {/* <!-- SELECT DURATION --> */}
-            <div id="select-duration-container" className="text-light">
-              <label>
-                <input
-                  type="radio"
-                  name="chart_duration"
-                  onClick={() => changeDuration("5d")}
-                />
-                <span className="checkmark"></span>
-                5D
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chart_duration"
-                  defaultChecked
-                  onClick={() => changeDuration("mtd")}
-                />
-                <span className="checkmark"></span>
-                MTD
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chart_duration"
-                  onClick={() => changeDuration("l3y")}
-                />
-                <span className="checkmark"></span>
-                3Y
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chart_duration"
-                  onClick={() => changeDuration("l5y")}
-                />
-                <span className="checkmark"></span>
-                5Y
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chart_duration"
-                  onClick={() => changeDuration("l20y")}
-                />
-                <span className="checkmark"></span>
-                20Y
-              </label>
-            </div>
+          {stockSymbol && (
+            <div id="chart-controls" className="flex space-between">
+              {/* <!-- SELECT DURATION --> */}
+              <div id="select-duration-container" className="text-light">
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_duration"
+                    onClick={() => changeDuration("5d")}
+                  />
+                  <span className="checkmark"></span>
+                  5D
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_duration"
+                    defaultChecked
+                    onClick={() => changeDuration("mtd")}
+                  />
+                  <span className="checkmark"></span>
+                  MTD
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_duration"
+                    onClick={() => changeDuration("l3y")}
+                  />
+                  <span className="checkmark"></span>
+                  3Y
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_duration"
+                    onClick={() => changeDuration("l5y")}
+                  />
+                  <span className="checkmark"></span>
+                  5Y
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_duration"
+                    onClick={() => changeDuration("l20y")}
+                  />
+                  <span className="checkmark"></span>
+                  20Y
+                </label>
+              </div>
 
-            {/* <!-- SELECT SERIES --> */}
-            <div id="select-series-container" className="text-light">
-              <label>
-                <input
-                  type="radio"
-                  name="chart_type"
-                  onClick={() => changeSeries("candle")}
-                />
-                <span className="checkmark"></span>
-                Candlestick Chart
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chart_type"
-                  onClick={() => changeSeries("line")}
-                  defaultChecked
-                />
-                <span className="checkmark"></span>
-                Line Chart
-              </label>
+              {/* <!-- SELECT SERIES --> */}
+              <div id="select-series-container" className="text-light">
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_type"
+                    onClick={() => changeSeries("candle")}
+                  />
+                  <span className="checkmark"></span>
+                  Candlestick Chart
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="chart_type"
+                    onClick={() => changeSeries("line")}
+                    defaultChecked
+                  />
+                  <span className="checkmark"></span>
+                  Line Chart
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+        {stockSymbol && (
+          <div id="stock-news-container">
+            <h2>News</h2>
+            <div className="flex">
+              {newsList ? (
+                <div id="stock-news-list">
+                  <div>
+                    <ul>
+                      {newsList.map((itm, idx) => {
+                        return (
+                          <li key={`top-gainer-itm-${idx}`} className="flex">
+                            <div className="stock-news-date">
+                              {DateTime.fromISO(itm.time_published).toFormat(
+                                "M-dd-yyyy"
+                              )}
+                            </div>
+
+                            <div>
+                              <div className="stock-news-source">
+                                {String(itm.source_domain).replace("www.", "")}
+                              </div>
+
+                              <div className="stock-news-title">
+                                {" "}
+                                {String(itm.title).split(" - ")[0]}
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+
+              {newsList2 ? (
+                <div id="stock-news-list">
+                  <div>
+                    <ul>
+                      {newsList2.map((itm, idx) => {
+                        return (
+                          <li key={`top-gainer-itm-${idx}`} className="flex">
+                            <div className="stock-news-date">
+                              {DateTime.fromISO(itm.time_published).toFormat(
+                                "M-dd-yyyy"
+                              )}
+                            </div>
+
+                            <div>
+                              <div className="stock-news-source">
+                                {String(itm.source_domain).replace("www.", "")}
+                              </div>
+
+                              <div className="stock-news-title">
+                                {" "}
+                                {String(itm.title).split(" - ")[0]}
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
-        </div>
-
-        <div id="stock-news-container">
-          <h2>News</h2>
-          <div className="flex">
-            {newsList ? (
-              <div id="stock-news-list">
-                <div>
-                  <ul>
-                    {newsList.map((itm, idx) => {
-                      return (
-                        <li key={`top-gainer-itm-${idx}`} className="flex">
-                          <div className="stock-news-date">
-                            {DateTime.fromISO(itm.time_published).toFormat(
-                              "M-dd-yyyy"
-                            )}
-                          </div>
-
-                          <div>
-                            <div className="stock-news-source">
-                              {String(itm.source_domain).replace("www.", "")}
-                            </div>
-
-                            <div className="stock-news-title">
-                              {" "}
-                              {String(itm.title).split(" - ")[0]}
-                            </div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            ) : null}
-
-            {newsList2 ? (
-              <div id="stock-news-list">
-                <div>
-                  <ul>
-                    {newsList2.map((itm, idx) => {
-                      return (
-                        <li key={`top-gainer-itm-${idx}`} className="flex">
-                          <div className="stock-news-date">
-                            {DateTime.fromISO(itm.time_published).toFormat(
-                              "M-dd-yyyy"
-                            )}
-                          </div>
-
-                          <div>
-                            <div className="stock-news-source">
-                              {String(itm.source_domain).replace("www.", "")}
-                            </div>
-
-                            <div className="stock-news-title">
-                              {" "}
-                              {String(itm.title).split(" - ")[0]}
-                            </div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

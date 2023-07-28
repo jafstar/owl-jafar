@@ -134,7 +134,7 @@ const Header = () => {
    * @type EffectFunc
    */
   React.useEffect(() => {
-    searchInput("AAPL");
+    // searchInput("AAPL");
   }, []);
 
   return (

@@ -15,33 +15,6 @@ export const idbCon = new Connection(new Worker(workerPath));
 export const dbname = "OWL";
 
 const getDatabase = () => {
-  const tblHandHistory = {
-    name: "HandHistory",
-    columns: {
-      id: {
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      deck: {
-        notNull: true,
-        dataType: DATA_TYPE.Array,
-      },
-      community: {
-        notNull: true,
-        dataType: DATA_TYPE.Array,
-      },
-      players: {
-        notNull: true,
-        dataType: DATA_TYPE.Array,
-        // default: []
-      },
-      winners: {
-        notNull: true,
-        dataType: DATA_TYPE.Array,
-      },
-    },
-  };
-
   const tblSearchHistory = {
     name: "SearchHistory",
     columns: {
@@ -58,7 +31,7 @@ const getDatabase = () => {
 
   const dataBase = {
     name: dbname,
-    tables: [tblHandHistory, tblSearchHistory],
+    tables: [tblSearchHistory],
   };
 
   return dataBase;

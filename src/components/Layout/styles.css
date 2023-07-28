@@ -388,9 +388,15 @@
 .triangle.colorUp {
   border-bottom-color: #36b769;
   transform: rotate(0deg);
+  top: -10px;
 }
 .triangle.colorDown {
   border-bottom-color: #ef5350;
   transform: rotate(180deg);
   top: 2px;
+}
+
+#empty-search {
+  color: #999;
+  margin-top: 150px;
 }
