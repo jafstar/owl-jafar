@@ -421,8 +421,13 @@ const Home = () => {
     tmpAreaSeries.setData([...tmpAreaData]);
     tmpVolumeSeries.setData([...tmpVolData]);
 
+    console.log("window.innerWidth: ", window.innerWidth);
+
     // Adjust chart
-    chart.resize(window.innerWidth * _WIDTH_RATIO, _HEIGHT);
+    chart.resize(
+      window.innerWidth * _WIDTH_RATIO,
+      window.innerWidth < 800 ? 400 : _HEIGHT
+    );
     chart.timeScale().fitContent();
 
     updateAreaSeries(_COLOR_AREA);
@@ -520,6 +525,7 @@ const Home = () => {
       const chart = chartRef.current.api();
       chart.applyOptions({
         width: window.innerWidth * _WIDTH_RATIO,
+        height: window.innerWidth < 800 ? 400 : _HEIGHT,
       });
       chart.timeScale().fitContent();
     };
@@ -729,11 +735,6 @@ const Home = () => {
             ) : null}
           </div>
         </div>
-
-        {/* <div>
-          <h1>{stockSymbol && stockSymbol["2. name"]}</h1>
-          <h2>{stockSymbol && stockSymbol["1. symbol"]}</h2>
-        </div> */}
       </div>
     </div>
   );

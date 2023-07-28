@@ -318,7 +318,7 @@
     height: 190px;
   }
 }
-@media only screen and (max-width: 605px) {
+@media only screen and (max-width: 800px) {
   #logo a {
     width: 40px;
     overflow: hidden;
@@ -334,6 +334,9 @@
   }
   .search-box {
     margin: 0 20px 0 0;
+  }
+  #chartContainer {
+    height: 400px;
   }
 }
 @media only screen and (max-width: 450px) {
