@@ -165,6 +165,8 @@ const Home = () => {
 
   // State Local
   const [newsList, setNewsList] = React.useState(null);
+  const [newsList2, setNewsList2] = React.useState(null);
+
   const [globalQuote, setGlobalQuote] = React.useState(null);
 
   const changeSeries = (seriesType) => {
@@ -329,7 +331,7 @@ const Home = () => {
           default:
             reject(null);
         }
-      }, 2000);
+      }, 250);
     });
 
     // console.log("duration query: ", resp);
@@ -449,7 +451,7 @@ const Home = () => {
           default:
             reject(null);
         }
-      }, 2000);
+      }, 250);
     }).catch((err) => {
       console.log(err);
     });
@@ -480,15 +482,19 @@ const Home = () => {
           default:
             reject(null);
         }
-      }, 2000);
+      }, 250);
     }).catch((err) => {
       console.log(err);
     });
 
     console.log("news: ", resp);
     if (resp && resp.feed && resp.feed.length) {
-      const filterNews = [...resp.feed].slice(0, 11);
+      const filterNews = [...resp.feed].slice(0, 5);
       setNewsList(filterNews);
+      if (resp.feed.length > 5) {
+        const filterNews2 = [...resp.feed].slice(5, 10);
+        setNewsList2(filterNews2);
+      }
     }
   };
 
@@ -527,27 +533,42 @@ const Home = () => {
     <div id="home">
       <div>
         <div>
-          <div className="flex space-between">
-            <h2>{stockSymbol && stockSymbol["1. symbol"]}</h2>
-            <h2>{stockSymbol && stockSymbol["2. name"]}</h2>
-          </div>
-          {globalQuote && (
-            <div className="flex space-between">
-              <div>
-                <div> Open: {globalQuote["02. open"]}</div>
-                <div> High: {globalQuote["03. high"]}</div>
-                <div> Low: {globalQuote["04. low"]}</div>
-              </div>
-              <div>
-                <div> Price: {globalQuote["05. price"]}</div>
-                <div> Volume: {globalQuote["06. volume"]}</div>
-                <div>
-                  Change: {globalQuote["09. change"]} /{" "}
-                  {globalQuote["10. change percent"]}
+          <div id="stock-name" className="flex space-between">
+            <h2>
+              [{stockSymbol && stockSymbol["1. symbol"]}] &nbsp;&nbsp;
+              {stockSymbol && stockSymbol["2. name"]}
+            </h2>
+
+            <div id="global-quote-shell">
+              {globalQuote && (
+                <div id="global-quote" className="">
+                  <div id="global-quote-price" className="flex">
+                    <h2>${Number(globalQuote["05. price"]).toFixed(2)}</h2>
+                    <div>
+                      {Number(globalQuote["09. change"]).toFixed(2)}{" "}
+                      {parseFloat(globalQuote["10. change percent"]).toFixed(2)}
+                      %
+                    </div>
+                  </div>
+                  <div id="global-quote-info" className="flex space-between">
+                    <div>
+                      <span>Volume</span> <br />
+                      {globalQuote["06. volume"]}
+                    </div>
+                    <div>
+                      <span>Open</span>
+                      <br /> {Number(globalQuote["02. open"]).toFixed(2)}
+                    </div>
+                    <div>
+                      <span>Range</span>
+                      <br /> {Number(globalQuote["04. low"]).toFixed(2)} -{" "}
+                      {Number(globalQuote["03. high"]).toFixed(2)}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* <!-- CHART CONTAINER --> */}
           <div id="chartContainer"></div>
@@ -560,6 +581,7 @@ const Home = () => {
                   name="chart_duration"
                   onClick={() => changeDuration("5d")}
                 />
+                <span className="checkmark"></span>
                 5D
               </label>
               <label>
@@ -569,6 +591,7 @@ const Home = () => {
                   defaultChecked
                   onClick={() => changeDuration("mtd")}
                 />
+                <span className="checkmark"></span>
                 MTD
               </label>
               <label>
@@ -577,6 +600,7 @@ const Home = () => {
                   name="chart_duration"
                   onClick={() => changeDuration("l3y")}
                 />
+                <span className="checkmark"></span>
                 3Y
               </label>
               <label>
@@ -585,6 +609,7 @@ const Home = () => {
                   name="chart_duration"
                   onClick={() => changeDuration("l5y")}
                 />
+                <span className="checkmark"></span>
                 5Y
               </label>
               <label>
@@ -593,18 +618,20 @@ const Home = () => {
                   name="chart_duration"
                   onClick={() => changeDuration("l20y")}
                 />
+                <span className="checkmark"></span>
                 20Y
               </label>
             </div>
 
             {/* <!-- CHART SERIES SELECT --> */}
-            <div className="text-light">
+            <div id="select-series-container" className="text-light">
               <label>
                 <input
                   type="radio"
                   name="chart_type"
                   onClick={() => changeSeries("candle")}
                 />
+                <span className="checkmark"></span>
                 Candlestick Chart
               </label>
               <label>
@@ -614,25 +641,78 @@ const Home = () => {
                   onClick={() => changeSeries("line")}
                   defaultChecked
                 />
+                <span className="checkmark"></span>
                 Line Chart
               </label>
             </div>
           </div>
         </div>
 
-        <div>
+        <div id="stock-news-container">
           <h2>News</h2>
-          {newsList ? (
-            <div id="stock-news-list">
-              <div>
-                <ul>
-                  {newsList.map((itm, idx) => {
-                    return <li key={`top-gainer-itm-${idx}`}>{itm.title}</li>;
-                  })}
-                </ul>
+          <div className="flex">
+            {newsList ? (
+              <div id="stock-news-list">
+                <div>
+                  <ul>
+                    {newsList.map((itm, idx) => {
+                      return (
+                        <li key={`top-gainer-itm-${idx}`} className="flex">
+                          <div className="stock-news-date">
+                            {DateTime.fromISO(itm.time_published).toFormat(
+                              "M-dd-yyyy"
+                            )}
+                          </div>
+
+                          <div>
+                            <div className="stock-news-source">
+                              {String(itm.source_domain).replace("www.", "")}
+                            </div>
+
+                            <div className="stock-news-title">
+                              {" "}
+                              {String(itm.title).split(" - ")[0]}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+
+            {newsList2 ? (
+              <div id="stock-news-list">
+                <div>
+                  <ul>
+                    {newsList2.map((itm, idx) => {
+                      return (
+                        <li key={`top-gainer-itm-${idx}`} className="flex">
+                          <div className="stock-news-date">
+                            {DateTime.fromISO(itm.time_published).toFormat(
+                              "M-dd-yyyy"
+                            )}
+                          </div>
+
+                          <div>
+                            <div className="stock-news-source">
+                              {String(itm.source_domain).replace("www.", "")}
+                            </div>
+
+                            <div className="stock-news-title">
+                              {" "}
+                              {String(itm.title).split(" - ")[0]}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {/* <div>

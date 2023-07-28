@@ -47,7 +47,10 @@ const Header = () => {
    */
   const searchInput = async (tmpInput = inputRef.current.value) => {
     const currentInputVal = tmpInput;
-
+    if (!currentInputVal) {
+      toast.error("Please enter a stock symbol");
+      return;
+    }
     setIsLoading(true);
     setShowList(false);
 
@@ -74,7 +77,7 @@ const Header = () => {
           default:
             reject(null);
         }
-      }, 2000);
+      }, 250);
     }).catch((err) => {
       console.log(err);
     });
@@ -126,6 +129,15 @@ const Header = () => {
     }
   };
 
+  const handleOnKeyDown = (e) => {
+    if (e.keyCode === 13) {
+      console.log("enter key...");
+      if (inputRef.current.value !== "") {
+        searchInput(inputRef.current.value);
+      }
+    }
+  };
+
   /**
    * @name handleListClick
    * @type EventFunc
@@ -153,7 +165,7 @@ const Header = () => {
    */
   React.useEffect(() => {
     // setCurrentSymbol("GOOG");
-    // searchInput("AAPL");
+    searchInput("AAPL");
   }, []);
 
   return (
@@ -161,25 +173,32 @@ const Header = () => {
       <header className="flex space-between">
         <div className="flex">
           <div id="logo">
-            <h1>Old-Well Labs</h1>
+            <Link to="/">
+              <img src="/images/owl-icon-64.png" alt="owl logo" />
+              <h1>OWL</h1>
+            </Link>
           </div>
         </div>
 
         <div>
           <div className="search-box search-field ">
-            {isLoading && <i className="gg-spinner-two"></i>}
             <input
               ref={inputRef}
               type="search"
               name="input-symbol"
               className="search-field field input-text"
-              placeholder="symbol"
+              placeholder="Search..."
               onFocus={() => handleOnFocus()}
               onBlur={(e) => handleOnBlur(e)}
+              onKeyDown={(e) => handleOnKeyDown(e)}
               defaultValue={currentSymbol["1. symbol"]}
             />
             <button className="search-field" onClick={() => searchInput()}>
-              Search
+              {isLoading ? (
+                <i className="gg-spinner-two"></i>
+              ) : (
+                <i className="gg-search"></i>
+              )}
             </button>
             {showList && historyList.length && (
               <div className="search-list search-field">
