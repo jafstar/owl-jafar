@@ -169,6 +169,7 @@ const Home = () => {
   const [newsList2, setNewsList2] = React.useState(null);
   const [showChangePerc, setShowChangePerc] = React.useState(true);
   const [globalQuote, setGlobalQuote] = React.useState(null);
+  const [currentSeries, setCurrentSeries] = React.useState("line");
 
   const changeSeries = (seriesType) => {
     // setStateSeries(areaSeries);
@@ -190,6 +191,8 @@ const Home = () => {
     if (seriesType === "candle") {
       areaColor = "transparent";
     }
+
+    setCurrentSeries(seriesType);
 
     updateAreaSeries(areaColor);
     updateCandleSeries(candleColor);
@@ -430,7 +433,15 @@ const Home = () => {
     );
     chart.timeScale().fitContent();
 
-    updateAreaSeries(_COLOR_AREA);
+    if (currentSeries === "line") {
+      updateAreaSeries(_COLOR_AREA);
+    } else {
+      let candleColor = {
+        up: _COLOR_UP,
+        down: _COLOR_DOWN,
+      };
+      updateCandleSeries(candleColor);
+    }
 
     // UI Toast
     toast.remove();
