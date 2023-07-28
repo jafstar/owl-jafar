@@ -17,15 +17,15 @@ import {
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
 // import { DAILY_GOOG, DAILY_IBM } from "../../../mockdata/TIME_SERIES_DAILY";
-import {
-  DURATION_5D_AAPL,
-  DURATION_MTD_AAPL,
-  DURATION_MTD_IBM,
-  DURATION_MTD_GOOG,
-  DURATION_L3Y_AAPL,
-  DURATION_L5Y_AAPL,
-  DURATION_L20Y_AAPL,
-} from "../../../mockdata/DURATION";
+// import {
+//   DURATION_5D_AAPL,
+//   DURATION_MTD_AAPL,
+//   DURATION_MTD_IBM,
+//   DURATION_MTD_GOOG,
+//   DURATION_L3Y_AAPL,
+//   DURATION_L5Y_AAPL,
+//   DURATION_L20Y_AAPL,
+// } from "../../../mockdata/DURATION";
 
 import {
   GLOBAL_QUOTE_AAPL,
@@ -33,7 +33,8 @@ import {
   GLOBAL_QUOTE_IBM,
 } from "../../../mockdata/GLOBAL_QUOTE";
 
-import { NEWS_SENT_AAPL } from "../../../mockdata/NEWS_SENT_AAPL";
+import { fetchData } from "../../utils/fetch";
+// import { NEWS_SENT_AAPL } from "../../../mockdata/NEWS_SENT_AAPL";
 import "./styles.css";
 
 const chartOptions = {
@@ -296,47 +297,50 @@ const Home = () => {
     const queryCustom = queryObject.custom ? queryObject.custom : "";
 
     // PROD QUERY
-    // const url = `https://www.alphavantage.co/query?${queryInterval}${queryCustom}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
+    const url = `https://www.alphavantage.co/query?${queryInterval}${queryCustom}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
     // const getData = await fetch(url);
     // const resp = await getData.json();
-
-    // MOCK DATA
-    const resp = await new Promise((resolve) => {
-      setTimeout(() => {
-        switch (durationType) {
-          case "5d":
-            resolve(DURATION_5D_AAPL);
-            break;
-          case "mtd":
-            switch (querySymbol.toLocaleLowerCase()) {
-              case "aapl":
-                resolve(DURATION_MTD_AAPL);
-                break;
-              case "goog":
-                resolve(DURATION_MTD_GOOG);
-                break;
-              case "ibm":
-                resolve(DURATION_MTD_IBM);
-                break;
-              default:
-                reject(null);
-            }
-
-            break;
-          case "l3y":
-            resolve(DURATION_L3Y_AAPL);
-            break;
-          case "l5y":
-            resolve(DURATION_L5Y_AAPL);
-            break;
-          case "l20y":
-            resolve(DURATION_L20Y_AAPL);
-            break;
-          default:
-            reject(null);
-        }
-      }, 250);
+    const resp = await fetchData(url, {
+      querySymbol: querySymbol,
+      durationType: durationType,
     });
+    // MOCK DATA
+    // const resp = await new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     switch (durationType) {
+    //       case "5d":
+    //         resolve(DURATION_5D_AAPL);
+    //         break;
+    //       case "mtd":
+    //         switch (querySymbol.toLocaleLowerCase()) {
+    //           case "aapl":
+    //             resolve(DURATION_MTD_AAPL);
+    //             break;
+    //           case "goog":
+    //             resolve(DURATION_MTD_GOOG);
+    //             break;
+    //           case "ibm":
+    //             resolve(DURATION_MTD_IBM);
+    //             break;
+    //           default:
+    //             reject(null);
+    //         }
+
+    //         break;
+    //       case "l3y":
+    //         resolve(DURATION_L3Y_AAPL);
+    //         break;
+    //       case "l5y":
+    //         resolve(DURATION_L5Y_AAPL);
+    //         break;
+    //       case "l20y":
+    //         resolve(DURATION_L20Y_AAPL);
+    //         break;
+    //       default:
+    //         reject(null);
+    //     }
+    //   }, 250);
+    // });
 
     // console.log("duration query: ", resp);
 
@@ -449,29 +453,33 @@ const Home = () => {
 
   const getGlobalQuote = async (tmpSymbol) => {
     // Prod Query
-    // const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${tmpSymbol}&apikey=${API_KEY}`;
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${tmpSymbol}&apikey=${API_KEY}`;
     // const getData = await fetch(url);
     // const resp = await getData.json();
-    // MOCK DATA
-    const resp = await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        switch (tmpSymbol.toLocaleLowerCase()) {
-          case "aapl":
-            resolve(GLOBAL_QUOTE_AAPL);
-            break;
-          case "goog":
-            resolve(GLOBAL_QUOTE_GOOG);
-            break;
-          case "ibm":
-            resolve(GLOBAL_QUOTE_IBM);
-            break;
-          default:
-            reject(null);
-        }
-      }, 250);
-    }).catch((err) => {
-      console.log(err);
+    const resp = await fetchData(url, {
+      symbol: tmpSymbol.toLocaleLowerCase(),
     });
+
+    // MOCK DATA
+    // const resp = await new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     switch (tmpSymbol.toLocaleLowerCase()) {
+    //       case "aapl":
+    //         resolve(GLOBAL_QUOTE_AAPL);
+    //         break;
+    //       case "goog":
+    //         resolve(GLOBAL_QUOTE_GOOG);
+    //         break;
+    //       case "ibm":
+    //         resolve(GLOBAL_QUOTE_IBM);
+    //         break;
+    //       default:
+    //         reject(null);
+    //     }
+    //   }, 250);
+    // }).catch((err) => {
+    //   console.log(err);
+    // });
 
     console.log("global quote: ", resp);
     setGlobalQuote(resp["Global Quote"]);
@@ -479,30 +487,35 @@ const Home = () => {
 
   const getNewsData = async (tmpSymbol) => {
     // Prod Query
-    // const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${tmpSymbol}&apikey=${API_KEY}`;
-    // const getData = await fetch(url);
+    const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${tmpSymbol}&apikey=${API_KEY}`;
+    // const getData = await fetchData(url, {
+    //   symbol: tmpSymbol.toLocaleLowerCase(),
+    // });
     // const resp = await getData.json();
+    const resp = await fetchData(url, {
+      symbol: tmpSymbol.toLocaleLowerCase(),
+    });
 
     // MOCK DATA
-    const resp = await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        switch (tmpSymbol.toLocaleLowerCase()) {
-          case "aapl":
-            resolve(NEWS_SENT_AAPL);
-            break;
-          case "goog":
-            resolve(NEWS_SENT_AAPL);
-            break;
-          case "ibm":
-            resolve(NEWS_SENT_AAPL);
-            break;
-          default:
-            reject(null);
-        }
-      }, 250);
-    }).catch((err) => {
-      console.log(err);
-    });
+    // const resp = await new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     switch (tmpSymbol.toLocaleLowerCase()) {
+    //       case "aapl":
+    //         resolve(NEWS_SENT_AAPL);
+    //         break;
+    //       case "goog":
+    //         resolve(NEWS_SENT_AAPL);
+    //         break;
+    //       case "ibm":
+    //         resolve(NEWS_SENT_AAPL);
+    //         break;
+    //       default:
+    //         reject(null);
+    //     }
+    //   }, 250);
+    // }).catch((err) => {
+    //   console.log(err);
+    // });
 
     console.log("news: ", resp);
     if (resp && resp.feed && resp.feed.length) {

@@ -4,11 +4,12 @@ import toast from "react-hot-toast";
 import { atom, selector, DefaultValue, useRecoilState } from "recoil";
 import { addHistory, getHistory } from "../../utils/db";
 
-import {
-  SEARCH_QUERY_AAPL,
-  SEARCH_QUERY_GOOG,
-  SEARCH_QUERY_IBM,
-} from "../../../mockdata/SEARCH_QUERY";
+// import {
+//   SEARCH_QUERY_AAPL,
+//   SEARCH_QUERY_GOOG,
+//   SEARCH_QUERY_IBM,
+// } from "../../../mockdata/SEARCH_QUERY";
+import { fetchData } from "../../utils/fetch";
 import "./styles.css";
 
 const API_KEY = process.env.ALPHAVANTAGE_API;
@@ -56,31 +57,32 @@ const Header = () => {
 
     toast.loading("Waiting...");
 
-    /*
     const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currentInputVal}&apikey=${API_KEY}`;
-    const getData = await fetch(url);
-    const resp = await getData.json();
-    */
-    // MOCK DATA
-    const resp = await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        switch (currentInputVal.toLocaleLowerCase()) {
-          case "aapl":
-            resolve(SEARCH_QUERY_AAPL);
-            break;
-          case "goog":
-            resolve(SEARCH_QUERY_GOOG);
-            break;
-          case "ibm":
-            resolve(SEARCH_QUERY_IBM);
-            break;
-          default:
-            reject(null);
-        }
-      }, 250);
-    }).catch((err) => {
-      console.log(err);
+    // const getData = await fetch(url);
+    // const resp = await getData.json();
+    const resp = await fetchData(url, {
+      symbol: currentInputVal.toLocaleLowerCase(),
     });
+    // MOCK DATA
+    // const resp = await new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     switch (currentInputVal.toLocaleLowerCase()) {
+    //       case "aapl":
+    //         resolve(SEARCH_QUERY_AAPL);
+    //         break;
+    //       case "goog":
+    //         resolve(SEARCH_QUERY_GOOG);
+    //         break;
+    //       case "ibm":
+    //         resolve(SEARCH_QUERY_IBM);
+    //         break;
+    //       default:
+    //         reject(null);
+    //     }
+    //   }, 250);
+    // }).catch((err) => {
+    //   console.log(err);
+    // });
 
     setIsLoading(false);
     toast.remove();
