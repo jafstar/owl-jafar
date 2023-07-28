@@ -555,7 +555,13 @@ const Home = () => {
                       <div id="quote-indicator"></div>
                       {showChangePerc ? (
                         <span id="quote-change-perc">
-                          {" "}
+                          <div
+                            className={`triangle ${
+                              parseFloat(globalQuote["10. change percent"]) < 0
+                                ? "colorDown"
+                                : "colorUp"
+                            }`}
+                          ></div>{" "}
                           {parseFloat(
                             globalQuote["10. change percent"]
                           ).toFixed(2)}
