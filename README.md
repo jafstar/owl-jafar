@@ -20,7 +20,8 @@
 
 ## Mock Data Stock Symbols
 
-- There are 3 symbols in the mock data to use
+There are 3 symbols in the mock data to use
+
 - GOOG
 - AAPL
 - IBM
