@@ -33,6 +33,7 @@ const Home = () => {
   const [showChangePerc, setShowChangePerc] = React.useState(true);
   const [globalQuote, setGlobalQuote] = React.useState(null);
   const [currentSeries, setCurrentSeries] = React.useState("line");
+  const [currentDuration, setCUrrentDuration] = React.useState("mtd");
 
   const changeSeries = (seriesType) => {
     let areaColor = _COLOR_AREA;
@@ -241,6 +242,8 @@ const Home = () => {
       updateCandleSeries(candleColor);
     }
 
+    setCUrrentDuration(durationType);
+
     // UI Toast
     toast.remove();
   };
@@ -277,7 +280,7 @@ const Home = () => {
    */
   React.useEffect(() => {
     if (stockSymbol) {
-      changeDuration("mtd");
+      changeDuration(currentDuration);
       const tmpStock = stockSymbol["1. symbol"];
       getNewsData(tmpStock);
       getGlobalQuote(tmpStock);
