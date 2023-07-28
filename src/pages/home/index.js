@@ -7,6 +7,7 @@ import { DateTime } from "luxon";
 
 import {
   API_KEY,
+  _WIDTH_RATIO,
   _HEIGHT,
   _COLOR_UP,
   _COLOR_DOWN,
@@ -14,36 +15,25 @@ import {
 } from "../../constants";
 import { formatAPIData } from "../../utils/format";
 import { atomCurrentSymbol } from "../../components/Layout/Header";
-// import {
-//   DAILY_AAPL,
-//   DAILY_GOOG,
-//   DAILY_IBM,
-// } from "../../../mockdata/TIME_SERIES_DAILY";
+// import { DAILY_GOOG, DAILY_IBM } from "../../../mockdata/TIME_SERIES_DAILY";
 import {
   DURATION_5D_AAPL,
   DURATION_MTD_AAPL,
+  DURATION_MTD_IBM,
+  DURATION_MTD_GOOG,
   DURATION_L3Y_AAPL,
   DURATION_L5Y_AAPL,
   DURATION_L20Y_AAPL,
 } from "../../../mockdata/DURATION";
 
-import "./styles.css";
+import {
+  GLOBAL_QUOTE_AAPL,
+  GLOBAL_QUOTE_GOOG,
+  GLOBAL_QUOTE_IBM,
+} from "../../../mockdata/GLOBAL_QUOTE";
 
-function timeToLocal(originalTime) {
-  const parsedTime = Date.parse(originalTime) / 1000;
-  const d = new Date(parsedTime * 1000);
-  return (
-    Date.UTC(
-      d.getFullYear(),
-      d.getMonth(),
-      d.getDate(),
-      d.getHours(),
-      d.getMinutes(),
-      d.getSeconds(),
-      d.getMilliseconds()
-    ) / 1000
-  );
-}
+import { NEWS_SENT_AAPL } from "../../../mockdata/NEWS_SENT_AAPL";
+import "./styles.css";
 
 const chartOptions = {
   layout: {
@@ -52,6 +42,10 @@ const chartOptions = {
       type: "solid",
       color: "#111",
     },
+  },
+  grid: {
+    vertLines: { color: "#222" },
+    horzLines: { color: "#222" },
   },
   rightPriceScale: {
     borderVisible: false,
@@ -70,7 +64,7 @@ const Home = () => {
   const chartRef = React.useRef({
     api() {
       if (!this._api) {
-        console.log("new chart created...");
+        // console.log("new chart created...");
         this._api = createChart(
           document.getElementById("chartContainer"),
           chartOptions
@@ -169,6 +163,10 @@ const Home = () => {
   // State Store
   const stockSymbol = useRecoilValue(atomCurrentSymbol);
 
+  // State Local
+  const [newsList, setNewsList] = React.useState(null);
+  const [globalQuote, setGlobalQuote] = React.useState(null);
+
   const changeSeries = (seriesType) => {
     // setStateSeries(areaSeries);
     // console.log("areaSeries: ", areaSeries);
@@ -234,9 +232,9 @@ const Home = () => {
 
     switch (durationType) {
       case "daily":
-        console.log("is daily: ", durationType === "daily");
+      // console.log("is daily: ", durationType === "daily");
       case "5d":
-        console.log("is 5d: ", durationType === "5d");
+        // console.log("is 5d: ", durationType === "5d");
         queryObject = {
           interval: "60min",
           custom: `outputsize=compact`,
@@ -245,7 +243,7 @@ const Home = () => {
         };
         break;
       case "mtd":
-        console.log("is mtd: ", durationType === "mtd");
+        // console.log("is mtd: ", durationType === "mtd");
         queryObject = {
           interval: "60min",
           custom: `&outputsize=full&month=${new Date().getFullYear()}-${new Date().getMonth()}`,
@@ -254,7 +252,7 @@ const Home = () => {
         };
         break;
       case "l3y":
-        console.log("is l3y: ", durationType === "l3y");
+        // console.log("is l3y: ", durationType === "l3y");
         queryObject = {
           interval: null,
           custom: `&outputsize=full`,
@@ -263,7 +261,7 @@ const Home = () => {
         };
         break;
       case "l5y":
-        console.log("is l5y: ", durationType === "l5y");
+        // console.log("is l5y: ", durationType === "l5y");
         queryObject = {
           interval: null,
           custom: `&outputsize=full`,
@@ -272,7 +270,7 @@ const Home = () => {
         };
         break;
       case "l20y":
-        console.log("is l20y: ", durationType === "l20y");
+        // console.log("is l20y: ", durationType === "l20y");
         queryObject = {
           interval: null,
           series: "TIME_SERIES_WEEKLY",
@@ -283,12 +281,15 @@ const Home = () => {
         console.log("durationType: ", durationType);
     }
 
-    // const querySymbol = stockSymbol["1. symbol"];
-    // const querySeries = queryObject.series;
-    // const queryInterval = queryObject.interval
-    //   ? "&interval=" + queryObject.interval
-    //   : "";
-    // const queryCustom = queryObject.custom ? queryObject.custom : "";
+    // QUERY VARs
+    const querySymbol = stockSymbol["1. symbol"];
+    const querySeries = queryObject.series;
+    const queryInterval = queryObject.interval
+      ? "&interval=" + queryObject.interval
+      : "";
+    const queryCustom = queryObject.custom ? queryObject.custom : "";
+
+    // PROD QUERY
     // const url = `https://www.alphavantage.co/query?${queryInterval}${queryCustom}&function=${querySeries}&symbol=${querySymbol}&apikey=${API_KEY}`;
     // const getData = await fetch(url);
     // const resp = await getData.json();
@@ -301,7 +302,20 @@ const Home = () => {
             resolve(DURATION_5D_AAPL);
             break;
           case "mtd":
-            resolve(DURATION_MTD_AAPL);
+            switch (querySymbol.toLocaleLowerCase()) {
+              case "aapl":
+                resolve(DURATION_MTD_AAPL);
+                break;
+              case "goog":
+                resolve(DURATION_MTD_GOOG);
+                break;
+              case "ibm":
+                resolve(DURATION_MTD_IBM);
+                break;
+              default:
+                reject(null);
+            }
+
             break;
           case "l3y":
             resolve(DURATION_L3Y_AAPL);
@@ -318,7 +332,7 @@ const Home = () => {
       }, 2000);
     });
 
-    console.log("duration query: ", resp);
+    // console.log("duration query: ", resp);
 
     if (!resp || !resp[queryObject.objName]) {
       // UI Toast
@@ -329,11 +343,11 @@ const Home = () => {
 
     const respAPI = resp[queryObject.objName];
 
-    console.log("respAPI: ", respAPI);
+    // console.log("respAPI: ", respAPI);
 
     const { chartData, volumeData, areaData } = formatAPIData(respAPI);
 
-    console.log("chartData: ", chartData);
+    // console.log("chartData: ", chartData);
 
     let filterAreaData = null;
     let filterCandleData = [];
@@ -359,14 +373,13 @@ const Home = () => {
         }
       });
     }
-    console.log("filterAreaData: ", filterAreaData);
-    console.log("filterCandleData: ", filterCandleData);
+    // console.log("filterAreaData: ", filterAreaData);
+    // console.log("filterCandleData: ", filterCandleData);
 
     let tmpAreaData = filterAreaData ? filterAreaData : areaData;
     let tmpVolData = filterVolData.length ? filterVolData : volumeData;
     let tmpChartData = filterCandleData.length ? filterCandleData : chartData;
 
-    // if (durationType === "5d") {
     tmpChartData = tmpChartData.map((itm) => {
       return {
         ...itm,
@@ -386,15 +399,15 @@ const Home = () => {
         time: Date.parse(itm.time) / 1000,
       };
     });
-    //   }
-    console.log("tmpAreaData: ", tmpAreaData);
-    console.log("tmpVolData: ", tmpVolData);
-    console.log("tmpChartData: ", tmpChartData);
+
+    // console.log("tmpAreaData: ", tmpAreaData);
+    // console.log("tmpVolData: ", tmpVolData);
+    // console.log("tmpChartData: ", tmpChartData);
 
     // Create or Reference Chart
     const chart = chartRef.current.api();
 
-    console.log("chart: ", chart);
+    // console.log("chart: ", chart);
 
     const tmpCandlestickSeries = chartRef.current.seriesCandle();
     const tmpAreaSeries = chartRef.current.seriesArea();
@@ -406,7 +419,7 @@ const Home = () => {
     tmpVolumeSeries.setData([...tmpVolData]);
 
     // Adjust chart
-    chart.resize(window.innerWidth * 0.7, _HEIGHT);
+    chart.resize(window.innerWidth * _WIDTH_RATIO, _HEIGHT);
     chart.timeScale().fitContent();
 
     updateAreaSeries(_COLOR_UP);
@@ -415,15 +428,83 @@ const Home = () => {
     toast.remove();
   };
 
+  const getGlobalQuote = async (tmpSymbol) => {
+    // Prod Query
+    // const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${tmpSymbol}&apikey=${API_KEY}`;
+    // const getData = await fetch(url);
+    // const resp = await getData.json();
+    // MOCK DATA
+    const resp = await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        switch (tmpSymbol.toLocaleLowerCase()) {
+          case "aapl":
+            resolve(GLOBAL_QUOTE_AAPL);
+            break;
+          case "goog":
+            resolve(GLOBAL_QUOTE_GOOG);
+            break;
+          case "ibm":
+            resolve(GLOBAL_QUOTE_IBM);
+            break;
+          default:
+            reject(null);
+        }
+      }, 2000);
+    }).catch((err) => {
+      console.log(err);
+    });
+
+    console.log("global quote: ", resp);
+    setGlobalQuote(resp["Global Quote"]);
+  };
+
+  const getNewsData = async (tmpSymbol) => {
+    // Prod Query
+    // const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${tmpSymbol}&apikey=${API_KEY}`;
+    // const getData = await fetch(url);
+    // const resp = await getData.json();
+
+    // MOCK DATA
+    const resp = await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        switch (tmpSymbol.toLocaleLowerCase()) {
+          case "aapl":
+            resolve(NEWS_SENT_AAPL);
+            break;
+          case "goog":
+            resolve(NEWS_SENT_AAPL);
+            break;
+          case "ibm":
+            resolve(NEWS_SENT_AAPL);
+            break;
+          default:
+            reject(null);
+        }
+      }, 2000);
+    }).catch((err) => {
+      console.log(err);
+    });
+
+    console.log("news: ", resp);
+    if (resp && resp.feed && resp.feed.length) {
+      const filterNews = [...resp.feed].slice(0, 11);
+      setNewsList(filterNews);
+    }
+  };
+
   /**
    * EFFECTS
    */
 
   React.useEffect(() => {
     if (stockSymbol) {
-      console.log("stock: ", stockSymbol);
+      // console.log("stock: ", stockSymbol);
       // callAPI(stockSymbol["1. symbol"]);
       changeDuration("mtd");
+
+      const tmpStock = stockSymbol["1. symbol"];
+      getNewsData(tmpStock);
+      getGlobalQuote(tmpStock);
     }
   }, [stockSymbol]);
 
@@ -431,7 +512,7 @@ const Home = () => {
     const handleResize = () => {
       const chart = chartRef.current.api();
       chart.applyOptions({
-        width: window.innerWidth * 0.7,
+        width: window.innerWidth * _WIDTH_RATIO,
       });
       chart.timeScale().fitContent();
     };
@@ -444,94 +525,120 @@ const Home = () => {
 
   return (
     <div id="home">
-      <div className="flex">
+      <div>
         <div>
-          <div className="flex">
+          <div className="flex space-between">
             <h2>{stockSymbol && stockSymbol["1. symbol"]}</h2>
             <h2>{stockSymbol && stockSymbol["2. name"]}</h2>
           </div>
-          {/* <!-- CHART SELECT DURATION --> */}
-          <div id="select-duration-container" className="text-light">
-            {/* <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                onClick={() => changeDuration("daily")}
-                defaultChecked
-              />
-              Daily
-            </label> */}
-            <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                onClick={() => changeDuration("5d")}
-              />
-              Last 5 Days
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                defaultChecked
-                onClick={() => changeDuration("mtd")}
-              />
-              Month to Date
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                onClick={() => changeDuration("l3y")}
-              />
-              Last 3 Years
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                onClick={() => changeDuration("l5y")}
-              />
-              Last 5 Years
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="chart_duration"
-                onClick={() => changeDuration("l20y")}
-              />
-              Last 20 Years
-            </label>
-          </div>
+          {globalQuote && (
+            <div className="flex space-between">
+              <div>
+                <div> Open: {globalQuote["02. open"]}</div>
+                <div> High: {globalQuote["03. high"]}</div>
+                <div> Low: {globalQuote["04. low"]}</div>
+              </div>
+              <div>
+                <div> Price: {globalQuote["05. price"]}</div>
+                <div> Volume: {globalQuote["06. volume"]}</div>
+                <div>
+                  Change: {globalQuote["09. change"]} /{" "}
+                  {globalQuote["10. change percent"]}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* <!-- CHART CONTAINER --> */}
           <div id="chartContainer"></div>
+          <div className="flex space-between">
+            {/* <!-- CHART SELECT DURATION --> */}
+            <div id="select-duration-container" className="text-light">
+              <label>
+                <input
+                  type="radio"
+                  name="chart_duration"
+                  onClick={() => changeDuration("5d")}
+                />
+                5D
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chart_duration"
+                  defaultChecked
+                  onClick={() => changeDuration("mtd")}
+                />
+                MTD
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chart_duration"
+                  onClick={() => changeDuration("l3y")}
+                />
+                3Y
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chart_duration"
+                  onClick={() => changeDuration("l5y")}
+                />
+                5Y
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chart_duration"
+                  onClick={() => changeDuration("l20y")}
+                />
+                20Y
+              </label>
+            </div>
 
-          {/* <!-- CHART SERIES SELECT --> */}
-          <div className="text-light">
-            <label>
-              <input
-                type="radio"
-                name="chart_type"
-                onClick={() => changeSeries("candle")}
-              />
-              Candlestick Chart
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="chart_type"
-                onClick={() => changeSeries("line")}
-                defaultChecked
-              />
-              Line Chart
-            </label>
+            {/* <!-- CHART SERIES SELECT --> */}
+            <div className="text-light">
+              <label>
+                <input
+                  type="radio"
+                  name="chart_type"
+                  onClick={() => changeSeries("candle")}
+                />
+                Candlestick Chart
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chart_type"
+                  onClick={() => changeSeries("line")}
+                  defaultChecked
+                />
+                Line Chart
+              </label>
+            </div>
           </div>
         </div>
+
         <div>
+          <h2>News</h2>
+          {newsList ? (
+            <div id="stock-news-list">
+              <div>
+                <ul>
+                  {newsList.map((itm, idx) => {
+                    return <li key={`top-gainer-itm-${idx}`}>{itm.title}</li>;
+                  })}
+                </ul>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* <div>
           <h1>{stockSymbol && stockSymbol["2. name"]}</h1>
           <h2>{stockSymbol && stockSymbol["1. symbol"]}</h2>
-        </div>
+        </div> */}
       </div>
     </div>
   );

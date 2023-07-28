@@ -33,3 +33,39 @@
   display: flex;
   column-gap: 20px;
 }
+.search-box {
+  position: relative;
+  z-index: 5555;
+}
+.search-list {
+  position: absolute;
+  width: 190px;
+  height: 200px;
+  background: #333;
+  /* right: 30px; */
+  top: 30px;
+  color: #ccc;
+  padding: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.search-list ul {
+  list-style-type: none;
+}
+.search-list li {
+  border-bottom: 1px solid #555;
+  padding: 10px 0;
+}
+
+#news-list {
+  color: #999;
+  column-gap: 40px;
+}
+
+#news-list h3 {
+  font-size: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #777;
+  margin-bottom: 20px;
+}

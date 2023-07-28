@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { atom, selector, DefaultValue, useRecoilState } from "recoil";
+import { addHistory, getHistory } from "../../utils/db";
 
 import {
   SEARCH_QUERY_AAPL,
@@ -37,11 +38,19 @@ const Header = () => {
 
   // Local State
   const [isLoading, setIsLoading] = React.useState(null);
+  const [showList, setShowList] = React.useState(false);
+  const [historyList, setHistoryList] = React.useState([]);
 
-  const SearchInput = async (tmpInput = inputRef.current.value) => {
+  /**
+   * @name searchInput
+   * @param {String} tmpInput
+   */
+  const searchInput = async (tmpInput = inputRef.current.value) => {
     const currentInputVal = tmpInput;
 
     setIsLoading(true);
+    setShowList(false);
+
     toast.loading("Waiting...");
 
     /*
@@ -66,22 +75,85 @@ const Header = () => {
             reject(null);
         }
       }, 2000);
+    }).catch((err) => {
+      console.log(err);
     });
 
     setIsLoading(false);
     toast.remove();
 
+    if (!resp || !resp.bestMatches) {
+      // Toast
+      toast.error(`No matches for ${currentInputVal} ...`);
+    }
+
     if (resp.bestMatches.length) {
       const selectedSymbol = resp.bestMatches[0]; // resp.bestMatches[0]["1. symbol"];
       setCurrentSymbol(selectedSymbol);
+
+      let tmpHandHistory = {
+        id: Date.now(),
+        stock: selectedSymbol["1. symbol"],
+      };
+
+      addHistory(tmpHandHistory);
     } else {
       toast.error("No symbol found");
     }
   };
 
+  /**
+   * @name handleOnFocus
+   * @type EventFunc
+   */
+  const handleOnFocus = async () => {
+    // console.log("on focus...");
+    setShowList(true);
+    const tmpList = await getHistory();
+    console.log("tmpList: ", tmpList);
+    setHistoryList([...tmpList]);
+  };
+
+  /**
+   * @name handleOnBlur
+   * @type EventFunc
+   * @param {Event} e
+   */
+  const handleOnBlur = (e) => {
+    // console.log("on blur...", e);
+    if (!e.target.className.includes("search-field")) {
+      setShowList(false);
+    }
+  };
+
+  /**
+   * @name handleListClick
+   * @type EventFunc
+   * @param {String} tmpSymbol
+   */
+  const handleListClick = (tmpSymbol) => {
+    searchInput(tmpSymbol);
+  };
+
+  /**
+   * @name showList
+   * @type EffectFunc
+   */
+  React.useEffect(() => {
+    if (showList) {
+      window.addEventListener("click", handleOnBlur);
+    } else {
+      window.removeEventListener("click", handleOnBlur);
+    }
+  }, [showList]);
+
+  /**
+   * @name componentMounted
+   * @type EffectFunc
+   */
   React.useEffect(() => {
     // setCurrentSymbol("GOOG");
-    SearchInput("AAPL");
+    // searchInput("AAPL");
   }, []);
 
   return (
@@ -91,34 +163,55 @@ const Header = () => {
           <div id="logo">
             <h1>Old-Well Labs</h1>
           </div>
-
-          <div id="header-nav">
-            <Link to="/">
-              <span>Watchlist</span>
-            </Link>
-            <Link to="/reports">
-              <span>Chart</span>
-            </Link>
-            <Link to="/gauges">
-              <span>News</span>
-            </Link>
-          </div>
         </div>
 
         <div>
-          <div className="search-box">
+          <div className="search-box search-field ">
             {isLoading && <i className="gg-spinner-two"></i>}
             <input
               ref={inputRef}
               type="search"
               name="input-symbol"
-              className="field input-text"
+              className="search-field field input-text"
               placeholder="symbol"
+              onFocus={() => handleOnFocus()}
+              onBlur={(e) => handleOnBlur(e)}
               defaultValue={currentSymbol["1. symbol"]}
             />
-            <button onClick={() => SearchInput()}>Search</button>
+            <button className="search-field" onClick={() => searchInput()}>
+              Search
+            </button>
+            {showList && historyList.length && (
+              <div className="search-list search-field">
+                <ul>
+                  {historyList.map((itm, idx) => {
+                    const stockSymbol = String(itm.stock).toUpperCase();
+                    return (
+                      <li
+                        onClick={() => handleListClick(stockSymbol)}
+                        key={`search-list-itm-${idx}`}
+                      >
+                        {stockSymbol}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* <div id="header-nav">
+          <Link to="/">
+            <span>Watchlist</span>
+          </Link>
+          <Link to="/chart">
+            <span>Chart</span>
+          </Link>
+          <Link to="/news">
+            <span>News</span>
+          </Link>
+        </div> */}
       </header>
     </div>
   );
